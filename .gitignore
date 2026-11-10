@@ -1,0 +1,73 @@
+# .NET build & publish outputs
+[Bb]in/
+[Oo]bj/
+[Pp]ublish/
+[Oo]ut/
+TestResults/
+*.trx
+*.coverage
+
+# Project-local SDKs, probes, and tool caches
+/.tools/
+/graft/
+/.ignore
+/.playwright-mcp/
+/.claude/
+/.codex/
+/.cursor/
+/.gemini/
+/.agent/
+/.agents/
+
+# Local runtime usage data, SQLite databases, logs, and CSV exports
+/data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.log
+*.csv
+
+# Local verification screenshots (contain personal SSID, hostname, and IPv6/MAC details)
+# and internal design/session notes (keep third-party licenses in docs/licenses/)
+/docs/*.png
+/docs/design.md
+/docs/design-sources.md
+
+# Secrets, credentials, and local environment configs
+.env
+.env.*
+appsettings.Development.json
+appsettings.Local.json
+*.pfx
+*.key
+*.pem
+*.cer
+*.snk
+
+# IDE and editor directories
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Python & Playwright test artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+playwright-report/
+test-results/
+
+# OS and temporary files
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.bak
+*.tmp
+*.swp

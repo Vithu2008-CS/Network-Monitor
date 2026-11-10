@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Flow · Network Monitor</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/enhancements.css">
+  <link rel="stylesheet" href="/studio.css">
+  <script src="/app.js" defer></script>
+  <script src="/controls.js" defer></script>
+  <script src="/startup.js" defer></script>
+</head>
+<body>
+  <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-flow" viewBox="0 0 24 24"><path d="M3 8h8l4-4h6M3 16h5l4-4h9M3 21h8l4-4h6"/></symbol>
+    <symbol id="i-overview" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-apps" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 9v11M6 6.5h.01M9 6.5h.01"/></symbol>
+    <symbol id="i-connections" viewBox="0 0 24 24"><path d="M8 7h12l-4-4M16 17H4l4 4M20 7l-4 4M4 17l4-4"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 11a9 9 0 1 1 2.5 7M3 4v7h7M12 7v5l3 2"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><rect x="8" y="3" width="8" height="6" rx="1"/><rect x="2" y="16" width="7" height="5" rx="1"/><rect x="15" y="16" width="7" height="5" rx="1"/><path d="M12 9v4M5.5 16v-3h13v3"/></symbol>
+    <symbol id="i-router" viewBox="0 0 24 24"><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 13V9m10 4V9M5 5a11 11 0 0 1 14 0M8 8a6 6 0 0 1 8 0M7 16.5h.01M11 16.5h.01"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="m10 3-.5 3-2 .9L5 5.5 2.5 10 5 11.5v2L2.5 15 5 19.5 7.5 18l2 .9.5 3h5l.5-3 2-.9 2.5 1.5 2.5-4.5-2.5-1.5v-2l2.5-1.5L20 5.5 17.5 7l-2-.9L15 3Z"/><circle cx="12.5" cy="12.5" r="3"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v16m-6-6 6 6 6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 20V4m-6 6 6-6 6 6"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M2 12h5l3-8 4 16 3-8h5"/></symbol>
+    <symbol id="i-wifi" viewBox="0 0 24 24"><path d="M2 8a16 16 0 0 1 20 0M5 12a11 11 0 0 1 14 0M8.5 16a5.5 5.5 0 0 1 7 0"/><circle cx="12" cy="20" r=".5"/></symbol>
+    <symbol id="i-pc" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8m-4-5v5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-5-5 5 5-5 5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.01"/></symbol>
+    <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 15v6h16v-6"/></symbol>
+  </svg>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <button id="nav-backdrop" class="nav-backdrop" aria-label="Close navigation" hidden></button>
+  <aside class="sidebar" id="sidebar" aria-label="Main navigation">
+    <button id="menu-close" class="icon-button menu-close" type="button" aria-label="Hide menu"><svg class="icon" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <a class="brand" href="#overview" aria-label="Flow Network Monitor home"><span class="brand-mark"><svg class="icon"><use href="#i-flow"/></svg></span><span>Flow<span class="brand-caption">Network Monitor</span></span></a>
+    <div class="sidebar-label">Workspace</div>
+    <nav class="navigation">
+      <a href="#overview" data-page="overview" aria-current="page"><svg class="icon"><use href="#i-overview"/></svg>Overview</a>
+      <a href="#applications" data-page="applications"><svg class="icon"><use href="#i-apps"/></svg>Applications<span class="nav-count" id="nav-app-count">—</span></a>
+      <a href="#connections" data-page="connections"><svg class="icon"><use href="#i-connections"/></svg>Connections</a>
+      <a href="#history" data-page="history"><svg class="icon"><use href="#i-history"/></svg>History</a>
+      <a href="#controls" data-page="controls"><svg class="icon"><use href="#i-shield"/></svg>App controls<span class="nav-tag">Admin</span></a>
+      <a href="#network" data-page="network"><svg class="icon"><use href="#i-network"/></svg>Network</a>
+      <a href="#router" data-page="router"><svg class="icon"><use href="#i-router"/></svg>Router<span class="nav-tag">Optional</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a href="#settings" data-page="settings" class="settings-link"><svg class="icon"><use href="#i-settings"/></svg>Settings</a>
+      <div class="local-note"><svg class="icon"><use href="#i-shield"/></svg><div>Local by design<span>Your traffic stays on this laptop.</span></div></div>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="topbar-left"><button id="header-menu-toggle" class="icon-button" type="button" aria-controls="sidebar" aria-label="Hide menu" aria-expanded="true"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg></button><a class="phone-brand" href="#overview" aria-label="Flow overview"><svg class="icon" aria-hidden="true"><use href="#i-flow"/></svg>Flow</a><span class="workspace-name">Personal workspace</span><span class="header-divider">/</span><span id="header-page">Overview</span></div>
+      <div class="topbar-right"><button id="quick-find" class="button button-small" type="button" aria-label="Find app"><svg class="icon"><use href="#i-search"/></svg><span class="find-label">Find app</span><kbd>Ctrl K</kbd></button><span id="health" class="health"><span class="status-dot"></span><span id="health-text">Connecting</span></span><span class="uptime" id="uptime">Session —</span><button id="pause-toggle" class="button button-small" type="button" aria-pressed="false"><svg class="icon" id="pause-icon"><use href="#i-pause"/></svg><span id="pause-label">Pause display</span></button></div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div class="page-heading"><div><h1 id="page-title">Network overview</h1><p id="page-description">A clear view of what moves through your laptop.</p></div><span class="machine-label"><svg class="icon"><use href="#i-pc"/></svg><span id="machine-name">This laptop</span></span></div>
+      <div id="connection-alert" class="notice notice-error" role="status" hidden><svg class="icon"><use href="#i-info"/></svg><div><strong id="connection-alert-title">Reconnecting to the monitor</strong><p id="connection-alert-detail">Waiting for the local service.</p></div><button class="button button-small" id="retry-state">Retry now</button></div>
+      <div id="admin-alert" class="notice notice-warning" hidden><svg class="icon"><use href="#i-shield"/></svg><div><strong>Enable live application traffic</strong><p>Launch <b>Start Monitor.cmd</b> and approve Windows elevation. Adapter totals still work without administrator access.</p></div><button id="dismiss-admin" class="icon-button" aria-label="Dismiss administrator notice"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <div id="paused-alert" class="notice notice-info" hidden><svg class="icon"><use href="#i-pause"/></svg><div><strong>Display paused</strong><p>Values on screen are frozen. Background collection continues. Resume to see the latest data.</p></div></div>
+      <details id="remote-alert" class="notice notice-info" hidden><summary>Paired phone access</summary><p>You can end verified app processes through this private link. Make router logins, limit changes, and startup settings on the laptop.</p></details>
+      <div id="diagnostics-alert" class="notice notice-warning" role="status" hidden><svg class="icon"><use href="#i-info"/></svg><div><strong>Collection needs attention</strong><p id="diagnostics-text"></p></div></div>
+
+      <section id="page-overview" class="page" aria-label="Overview">
+        <div class="metrics" id="overview-metrics" aria-label="Current network usage"></div>
+        <div id="overview-budget-notice" class="quota-warning" hidden></div>
+        <div class="overview-grid">
+          <section class="panel traffic-panel"><div class="panel-heading"><div><h2>Network activity</h2><p>Live traffic across this laptop</p></div><label class="compact-label">Units<select id="chart-unit" aria-label="Chart rate units"><option value="auto">Auto</option><option value="1000">KB/s</option><option value="1000000">MB/s</option><option value="1000000000">GB/s</option></select></label></div><div class="chart-key"><span><i class="key-dot download"></i>Download</span><span><i class="key-dot upload"></i>Upload</span><span class="chart-caption" id="chart-caption">Waiting for samples</span></div><div id="live-chart" class="live-chart"></div><div class="panel-foot"><span id="live-window">Collected while Flow is running</span><span>Updates every 2 seconds</span></div></section>
+          <aside class="overview-aside"><section class="panel" id="connection-card"></section><section class="panel" id="budget-card"></section></aside>
+        </div>
+        <div class="section-heading"><div><h2>Application activity</h2><p>Traffic since this monitor started</p></div><a class="text-link" href="#applications">All applications<svg class="icon"><use href="#i-arrow"/></svg></a></div>
+        <section class="panel table-panel"><div id="overview-apps"></div><div class="panel-foot"><span>Application totals may differ from adapter totals.</span><span id="overview-app-caption">Waiting for collection</span></div></section>
+        <div id="overview-insight" class="insight"></div>
+      </section>
+
+      <section id="page-applications" class="page" aria-label="Applications" hidden>
+        <div class="toolbar"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="app-search" type="search" placeholder="Find a program, executable path, or PID" aria-label="Search applications or paths" autocomplete="off"></label><label class="control-label" for="app-filter">Show<select id="app-filter"><option value="all">All observed apps</option><option value="connected">With connections</option><option value="transferring">Transferring now</option></select></label><label class="control-label">Sort by<select id="app-sort"><option value="rate">Current traffic</option><option value="total">Total usage</option><option value="download">Downloaded</option><option value="upload">Uploaded</option><option value="name">Name</option><option value="connections">Connections</option></select></label></div>
+        <section class="panel table-panel"><div class="panel-heading"><h2>All applications <span id="app-count" class="count-label"></span></h2><span class="muted small">Since monitor started</span></div><div id="applications-table"></div></section><p class="page-note">Select an application to inspect its executable, processes, protocols, and current connections.</p>
+      </section>
+
+      <section id="page-connections" class="page" aria-label="Connections" hidden>
+        <div class="toolbar"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="connection-search" type="search" placeholder="Search app, PID, address, or port" aria-label="Search connections" autocomplete="off"></label><label class="control-label">Protocol<select id="protocol-filter"><option value="all">All protocols</option><option value="TCP">TCP</option><option value="UDP">UDP</option></select></label></div><section class="panel table-panel"><div class="panel-heading"><h2>Open connections <span id="connection-count" class="count-label"></span></h2><span class="muted small">Current snapshot</span></div><div id="connections-table"></div></section><p class="page-note">Endpoints show addresses reported by Windows. UDP may not have a remote endpoint or connection state.</p>
+      </section>
+
+      <section id="page-history" class="page" aria-label="History" hidden>
+        <div class="toolbar"><div id="history-ranges" class="segmented" role="group" aria-label="History range"><button data-range="day" aria-pressed="true">Today</button><button data-range="week" aria-pressed="false">7 days</button><button data-range="month" aria-pressed="false">This month</button><button data-range="30days" aria-pressed="false">30 days</button><button data-range="custom" aria-pressed="false">Custom</button></div><div class="button-group"><button id="history-refresh" class="button">Refresh</button><button id="export-history" class="button"><svg class="icon"><use href="#i-export"/></svg>Export CSV</button></div></div>
+        <form id="history-dates" class="history-dates" hidden><label for="history-start">From<input id="history-start" type="date" required></label><label for="history-end">To<input id="history-end" type="date" required></label><button class="button button-primary" type="submit">Apply dates</button></form>
+        <p id="history-message" class="form-message" role="status"></p>
+        <div id="history-totals" class="metrics history-metrics"></div>
+        <section class="panel"><div class="panel-heading"><div><h2>Daily usage</h2><p id="history-period">Saved physical-adapter traffic</p></div><span id="history-updated" class="small muted"></span></div><div class="chart-key"><span><i class="key-dot download"></i>Downloaded</span><span><i class="key-dot upload"></i>Uploaded</span></div><div id="history-chart" class="history-chart"></div><p id="history-insight" class="panel-foot"></p></section>
+        <details class="panel history-storage"><summary><svg class="icon" aria-hidden="true"><use href="#i-shield"/></svg><span id="history-storage-status">Local database</span><span class="small muted">Storage details</span></summary><div id="history-storage"></div></details>
+        <div class="history-report-grid">
+          <section class="panel"><div class="panel-heading"><div><h2>Daily records</h2><p>Select a date to inspect its applications.</p></div></div><div id="history-days"></div></section>
+          <section class="panel"><div class="panel-heading"><div><h2>Usage by application</h2><p id="history-app-caption">Saved usage for this period</p></div></div><div class="history-app-tools"><label class="search-field"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="history-search" type="search" aria-label="Search saved applications" placeholder="Find a saved application" autocomplete="off"></label><label class="control-label">Sort by<select id="history-sort"><option value="total">Total usage</option><option value="download">Downloaded</option><option value="upload">Uploaded</option><option value="name">Name</option></select></label></div><div id="history-apps"></div></section>
+        </div>
+        <p class="page-note">Usage is saved on this laptop while Flow runs. Each day follows the laptop’s local date. Days without saved samples have gaps in the chart. Application shares use measured app traffic. Physical-adapter totals can differ, especially with VPNs.</p>
+      </section>
+
+      <section id="page-network" class="page" aria-label="Network adapters" hidden><div id="network-summary" class="subheading"></div><div id="adapter-list" class="adapter-grid"></div><p class="page-note">Adapter counters are reported by Windows and may span a different period than this monitor session. Virtual adapters can overlap physical traffic.</p></section>
+
+      <section id="page-router" class="page" aria-label="Router" hidden>
+        <div class="notice notice-info"><svg class="icon"><use href="#i-router"/></svg><div><strong>A wider view of your network</strong><p>Optional, read-only access to your router at 192.168.8.1. Router totals cover the whole network, including other devices.</p></div></div>
+        <div class="router-layout"><section class="panel router-access"><div class="panel-heading"><div><h2>Router access</h2><p>192.168.8.1</p></div><span id="router-status" class="badge">Not connected</span></div><form id="router-form" class="form-body" autocomplete="off"><label for="router-username">Username</label><input id="router-username" name="router-user" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" required maxlength="128" placeholder="Router username"><label for="router-password">Password</label><input id="router-password" name="router-pass" type="password" autocomplete="off" required maxlength="1024" placeholder="Router password"><p class="field-hint">Credentials are held in memory by the local service and are never saved to disk.</p><button id="router-connect" type="submit" class="button button-primary">Connect to router</button></form><div id="router-connected" class="form-body" hidden><p>Read-only access is active. No router settings are changed.</p><button id="router-disconnect" class="button">Disconnect router</button></div><p id="router-message" class="form-message inset" role="status"></p></section><section class="panel" id="router-details"></section></div>
+        <div class="section-heading"><div><h2>Connected devices</h2><p>Device information reported by the router</p></div></div><section class="panel table-panel" id="router-devices"></section><p class="page-note">Link rates describe a device’s connection to the router. They are not measured traffic or per-device usage.</p>
+      </section>
+
+      <section id="page-controls" class="page control-panel" aria-label="Application controls" hidden>
+        <div class="notice notice-info"><svg class="icon"><use href="#i-shield"/></svg><div><strong>Controls for this laptop</strong><p>Set daily quotas, block a program, or cap its upload rate. Paired phones can end verified processes. Network rules and Windows startup are managed on the laptop.</p></div></div>
+        <div class="control-toolbar"><button id="add-app-rule" class="button button-primary">Add app rule</button><button id="refresh-controls" class="button">Refresh controls</button><button id="restore-all-controls" class="button danger-button">Restore all app access</button></div>
+        <p id="controls-message" class="form-message" role="status"></p>
+        <div id="controls-stats" class="control-stats"></div>
+        <div class="control-grid">
+          <section class="panel"><div class="panel-heading"><div><h2>Daily laptop budget</h2><p>Download + upload · alert only</p></div></div><form id="daily-form" class="form-body control-form"><label for="daily-budget">Daily allowance (GB)</label><input id="daily-budget" type="number" min="0" max="100000" step="0.01" required value="0"><p id="daily-budget-summary" class="field-hint">Loading daily usage…</p><div class="rule-actions"><button id="save-daily-budget" class="button button-primary" type="submit">Update daily budget</button><button id="reset-daily-budget" class="button" type="button">Reset today's counter</button></div><p class="field-hint">0 turns the budget off. Resets preserve usage history. Counters start fresh automatically at local midnight.</p></form></section>
+          <section class="panel"><div class="panel-heading"><h2>Enforcement status</h2></div><div class="settings-copy"><p id="control-engine-status">Checking Windows controls…</p><h3>What a limit covers</h3><p>Daily app quotas count downloaded and uploaded bytes while Flow runs. Upload rate limits use Windows QoS; they do not cap download speed. Rules are checked about every 5 seconds, so a fast transfer can exceed a quota slightly.</p><h3>Recovery</h3><p>Normal shutdown releases Flow's network controls. If Flow crashes, a Windows block can remain. Run Restore Access.cmd or use Restore all app access. Other firewall rules are never removed.</p></div></section>
+        </div>
+        <div class="section-heading"><div><h2>Application rules</h2><p>Daily allowance, upload cap, and network access</p></div></div>
+        <div id="rules-list" class="control-grid"></div>
+        <div class="section-heading"><div><h2>Control activity</h2><p>Recent changes and quota alerts · stored on this laptop</p></div></div>
+        <section id="control-activity" class="panel activity-list"></section>
+      </section>
+      <section id="page-settings" class="page settings-page" aria-label="Settings" hidden>
+        <section class="panel"><div class="panel-heading"><h2>Automatic startup</h2><span id="startup-badge" class="badge">Checking</span></div><div class="form-body control-form"><p id="startup-status" class="startup-status">Checking Windows startup configuration…</p><p class="field-hint">Starts Flow in the background at Windows sign-in and unlock, including lid-open unlock. Administrator capture is enabled without storing a password. Only one instance runs.</p><div class="startup-controls"><button id="startup-enable" class="button button-primary" type="button">Enable automatic startup</button><button id="startup-disable" class="button" type="button">Disable automatic startup</button><button id="startup-refresh" class="button" type="button">Refresh status</button></div><p id="startup-message" class="form-message" role="status"></p></div></section>
+        <section class="panel"><div class="panel-heading"><h2>Appearance</h2></div><div class="form-body control-form"><label for="appearance-theme">Dashboard theme</label><select id="appearance-theme"><option value="light">Light</option><option value="dark">Dark</option></select><p class="field-hint">Saved in this browser. Network and control settings are unaffected.</p></div></section>
+        <section class="panel"><div class="panel-heading"><h2>Phone view</h2></div><div class="form-body"><p id="mobile-help" class="field-hint">Start Mobile Monitor.cmd enables an optional phone view on your Wi-Fi.</p><label for="mobile-link">Private pairing link</label><input id="mobile-link" type="text" readonly hidden><button id="copy-mobile-link" class="button" type="button" hidden>Copy phone link</button></div></section>
+        <section class="panel"><div class="panel-heading"><div><h2>Monthly data budget</h2><p>A reference for your laptop’s collected usage</p></div></div><form id="budget-form" class="form-body"><label for="budget-input">Monthly allowance</label><div class="input-with-unit"><input id="budget-input" type="number" min="0" max="100000" step="any" inputmode="decimal" placeholder="0" required aria-describedby="budget-hint"><span>GB</span></div><p id="budget-hint" class="field-hint">Use 0 for no budget. Download and upload both count toward the budget. 1 GB = 1,000,000,000 bytes.</p><button id="budget-save" class="button button-primary" type="submit">Save budget</button><p id="budget-message" class="form-message" role="status"></p></form></section>
+        <section class="panel"><div class="panel-heading"><h2>Collection &amp; privacy</h2><svg class="icon muted"><use href="#i-shield"/></svg></div><div class="settings-copy"><h3>Live application capture</h3><p>Launch <strong>Start Monitor.cmd</strong> and approve Windows elevation to enable per-application traffic collection. Adapter totals are available without administrator access.</p><div id="capture-status" class="capture-status">Waiting for collector status.</div><h3>Local history</h3><p>Usage is collected and stored on this laptop while the monitor runs. Flow cannot reconstruct traffic from before collection started or while it was stopped. App counters measure kernel TCP/IP traffic and may differ from physical-adapter totals, especially with a VPN.</p><h3>Pausing the display</h3><p>Pause display freezes the dashboard only. The local service continues collecting usage and history.</p><h3>Optional router access</h3><p>The router connection is read-only. Credentials stay in service memory for the connection. Whole-network totals are shown separately from laptop usage.</p><h3>Stop collection</h3><p>Shut down the local monitor service. Collection and history stop until you launch Start Monitor.cmd again.</p><button id="stop-monitor" class="button" type="button">Stop monitor</button><p id="stop-message" class="form-message" role="status"></p></div></section>
+      </section>
+      <footer class="footer"><span>Flow <span class="footer-dot">·</span> Network Monitor</span><span id="last-updated">Waiting for local service</span></footer>
+    </main>
+  </div>
+  <dialog id="app-dialog" class="app-dialog" aria-labelledby="detail-title"><div class="drawer-heading"><div><span class="small muted">Application details</span><h2 id="detail-title">Application</h2></div><button id="close-detail" class="icon-button" aria-label="Close application details"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="form-body"><div class="rule-actions"><button id="manage-app-rule" class="button button-primary">Set limits &amp; access</button><button id="manage-app-processes" class="button">Manage processes</button></div><p id="app-control-status" class="field-hint"></p></div><div id="app-detail" class="drawer-body"></div></dialog>
+  <dialog id="rule-dialog" class="app-dialog" aria-labelledby="rule-title"><div class="drawer-heading"><h2 id="rule-title">Application rule</h2><button id="close-rule-dialog" class="icon-button" aria-label="Close rule editor"><svg class="icon"><use href="#i-close"/></svg></button></div><form id="rule-form" class="form-body control-form"><label for="rule-app">Application</label><select id="rule-app" required></select><p id="rule-path" class="field-hint"></p><label for="rule-daily">Daily allowance (MB)</label><input id="rule-daily" type="number" min="0" max="100000000" step="0.01" required value="0"><label for="rule-overflow">When the daily allowance is reached</label><select id="rule-overflow"><option value="alert">Alert only</option><option value="block">Block this app's network access</option></select><label for="rule-upload">Upload speed cap (KB/s)</label><input id="rule-upload" type="number" min="0" max="10000000" step="1" required value="0"><p class="field-hint">0 means no speed cap. Upload only; download speed is not throttled.</p><label><input id="rule-blocked" type="checkbox"> Block network access now</label><label><input id="rule-enabled" type="checkbox" checked> Enable this rule</label><p class="field-hint">1 MB = 1,000,000 bytes. Daily quotas reset at local midnight. Rules apply to all instances of this executable.</p><button id="save-app-rule" class="button button-primary" type="submit">Save rule</button><p id="rule-message" class="form-message" role="status"></p></form></dialog>
+  <dialog id="process-dialog" class="app-dialog" aria-labelledby="process-title"><div class="drawer-heading"><h2 id="process-title">Running processes</h2><button id="close-process-dialog" class="icon-button" aria-label="Close process manager"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="drawer-body"><p class="page-note">Ending a process closes it immediately and may lose unsaved work. Each action targets one verified process, not its child processes.</p><button id="refresh-processes" class="button">Refresh process list</button><p id="process-message" class="form-message" role="status"></p><div id="process-list"></div></div></dialog>
+  <nav class="phone-nav" aria-label="Mobile navigation">
+    <a href="#overview" data-page="overview"><svg class="icon" aria-hidden="true"><use href="#i-overview"/></svg>Overview</a>
+    <a href="#applications" data-page="applications"><svg class="icon" aria-hidden="true"><use href="#i-apps"/></svg>Apps</a>
+    <a href="#connections" data-page="connections"><svg class="icon" aria-hidden="true"><use href="#i-connections"/></svg>Connections</a>
+    <button id="menu-toggle" type="button" aria-label="More pages" aria-controls="sidebar" aria-expanded="false"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>More</button>
+  </nav>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>
