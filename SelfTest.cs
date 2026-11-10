@@ -24,6 +24,16 @@ public static class SelfTest
         Check(Accounting.Csv("a\"b") == "\"a\"\"b\"", "CSV quoting");
         Check(RouterClient.ParseReply("prefix\n{\"success\":true}")["success"]!.GetValue<bool>(), "router response prefix");
         RouterTests.Run(Check);
+        Check(NativeConnections.ResolveService(443, "TCP") == "HTTPS", "service resolution HTTPS");
+        Check(NativeConnections.ResolveService(53, "UDP") == "DNS", "service resolution DNS");
+        Check(NativeConnections.ResolveService(22, "TCP") == "SSH", "service resolution SSH");
+        Check(NativeConnections.IdentifyOrg("server.1e100.net") == "Google", "org identification Google");
+        Check(NativeConnections.IdentifyOrg("one.one.one.one") == "Cloudflare", "org identification Cloudflare");
+        Check(NativeConnections.IdentifyOrg("ec2.amazonaws.com") == "AWS", "org identification AWS");
+        var diag = new NetworkDiagnostics();
+        Check(diag.Quality is not null, "diagnostics quality initialization");
+        diag.AddAlert("info", "Test Alert", "Testing alert system");
+        Check(diag.RecentAlerts().Length >= 1, "alert recording");
         var policy = new AccessPolicy(IPAddress.Parse("192.168.8.138"));
         var localRequest = new DefaultHttpContext();
         localRequest.Connection.RemoteIpAddress = IPAddress.Loopback;

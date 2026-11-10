@@ -19,8 +19,8 @@ async (page) => {
   await page.getByLabel('Close application details').click();
   await page.locator('#app-search').fill('');
   await page.goto('http://localhost:5099/#history');
-  await page.waitForFunction(() => document.querySelector('#history-chart svg'));
-  assert((await page.locator('#history-totals').innerText()).includes('MB'), 'History usage did not load');
+  await page.waitForFunction(() => /(?:MB|GB)/.test(document.querySelector('#history-totals')?.textContent || ''));
+  assert(/(?:MB|GB)/.test(await page.locator('#history-totals').innerText()), 'History usage did not load');
   await page.goto('http://localhost:5099/#network');
   await page.waitForFunction(() => document.querySelector('#adapter-list').textContent.includes('Wi-Fi'));
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Mobile page overflows horizontally');

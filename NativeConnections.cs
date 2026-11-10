@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -11,6 +12,83 @@ public static class NativeConnections
     private static extern uint GetExtendedTcpTable(IntPtr table, ref uint size, bool order, int family, int tableClass, uint reserved);
     [DllImport("iphlpapi.dll", SetLastError = true)]
     private static extern uint GetExtendedUdpTable(IntPtr table, ref uint size, bool order, int family, int tableClass, uint reserved);
+
+    private static readonly ConcurrentDictionary<string, string> HostCache = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, byte> InFlight = new(StringComparer.OrdinalIgnoreCase);
+
+    public static string ResolveService(int port, string protocol) => port switch
+    {
+        80 => "HTTP",
+        443 => "HTTPS",
+        53 => "DNS",
+        853 => "DoT",
+        22 => "SSH",
+        21 => "FTP",
+        25 => "SMTP",
+        110 => "POP3",
+        143 => "IMAP",
+        993 => "IMAPS",
+        995 => "POP3S",
+        587 => "SMTPS",
+        3389 => "RDP",
+        8080 or 8443 or 8000 => "Web-Alt",
+        5353 => "mDNS",
+        1900 => "SSDP",
+        123 => "NTP",
+        67 or 68 => "DHCP",
+        5099 => "Flow",
+        _ => ""
+    };
+
+    public static string? TryGetHost(string ip)
+    {
+        if (string.IsNullOrEmpty(ip) || ip == "*" || ip == "0.0.0.0" || ip == "::" || ip.StartsWith("127.") || ip == "::1") return null;
+        if (HostCache.TryGetValue(ip, out var cached)) return string.IsNullOrEmpty(cached) ? null : cached;
+
+        if (InFlight.TryAdd(ip, 0))
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(1500));
+                    var entry = await Dns.GetHostEntryAsync(ip, cts.Token);
+                    var name = entry.HostName;
+                    var org = IdentifyOrg(name);
+                    HostCache[ip] = string.IsNullOrEmpty(org) ? name : $"{name} ({org})";
+                }
+                catch
+                {
+                    HostCache[ip] = "";
+                }
+                finally
+                {
+                    InFlight.TryRemove(ip, out _);
+                }
+            });
+        }
+        return null;
+    }
+
+    public static string IdentifyOrg(string host)
+    {
+        if (string.IsNullOrEmpty(host)) return "";
+        var lower = host.ToLowerInvariant();
+        if (lower.Contains("1e100.net") || lower.Contains("google") || lower.Contains("youtube")) return "Google";
+        if (lower.Contains("microsoft") || lower.Contains("azure") || lower.Contains("live.com") || lower.Contains("office.com")) return "Microsoft";
+        if (lower.Contains("amazonaws") || lower.Contains("cloudfront") || lower.Contains("aws")) return "AWS";
+        if (lower.Contains("cloudflare") || lower == "one.one.one.one") return "Cloudflare";
+        if (lower.Contains("github")) return "GitHub";
+        if (lower.Contains("apple.com") || lower.Contains("icloud")) return "Apple";
+        if (lower.Contains("fastly")) return "Fastly";
+        if (lower.Contains("akamai")) return "Akamai";
+        if (lower.Contains("fbcdn") || lower.Contains("facebook") || lower.Contains("meta") || lower.Contains("whatsapp")) return "Meta";
+        if (lower.Contains("discord")) return "Discord";
+        if (lower.Contains("steam")) return "Steam";
+        if (lower.Contains("spotify")) return "Spotify";
+        if (lower.Contains("netflix")) return "Netflix";
+        return "";
+    }
 
     public static List<ConnectionRow> Read()
     {
@@ -54,7 +132,9 @@ public static class NativeConnections
                         var remotePort = tcp ? Port(ipv6 ? 44 : 16) : 0;
                         var pid = Marshal.ReadInt32(row, tcp ? (ipv6 ? 52 : 20) : (ipv6 ? 24 : 8));
                         var state = tcp ? ((TcpState)Marshal.ReadInt32(row, ipv6 ? 48 : 0)).ToString() : "Bound";
-                        result.Add(new(pid, "", tcp ? "TCP" : "UDP", local, localPort, remote, remotePort, state));
+                        var service = ResolveService(remotePort > 0 ? remotePort : localPort, tcp ? "TCP" : "UDP");
+                        var remoteHost = tcp && remote != "*" ? TryGetHost(remote) : null;
+                        result.Add(new(pid, "", tcp ? "TCP" : "UDP", local, localPort, remote, remotePort, state, remoteHost, service));
                     }
                     break;
                 }

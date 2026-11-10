@@ -25,6 +25,7 @@ const pages = {
   overview: ['Network overview', 'A clear view of what moves through your laptop.'],
   applications: ['Applications', 'See which programs use your connection.'],
   connections: ['Connections', 'Inspect the endpoints your applications are talking to.'],
+  diagnostics: ['Network diagnostics', 'Measure real-time latency, jitter, packet loss, DNS, and speed.'],
   controls: ['Application controls', 'Manage daily allowances, network access, and running programs.'],
   history: ['Usage history', 'Understand your locally collected network usage.'],
   network: ['Network adapters', 'Your physical and virtual connections, in one place.'],
@@ -222,7 +223,7 @@ function render() {
   text('machine-name', state?.machineName || 'This laptop');
   text('nav-app-count', state ? count(state.summary.activeApps) : '—');
   if (state && !budgetDirty && document.activeElement !== $('budget-input')) $('budget-input').value = state.settings?.budgetGb ?? 0;
-  const renderers = {overview: renderOverview, applications: renderApps, connections: renderConnections, history: renderHistory, network: renderNetwork, router: renderRouter, settings: renderSettings, controls: () => window.flowControls?.render()};
+  const renderers = {overview: renderOverview, applications: renderApps, connections: renderConnections, diagnostics: renderDiagnostics, history: renderHistory, network: renderNetwork, router: renderRouter, settings: renderSettings, controls: () => window.flowControls?.render()};
   renderers[page]();
   if ($('app-dialog').open) renderDetail();
   showHealth();
@@ -240,6 +241,32 @@ function renderOverview() {
   if (adapter) {
     put('connection-card', el('div', {class: 'aside-body'}, el('div', {class: 'aside-top'}, el('span', {class: 'connection-icon'}, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, 'Your connection'), el('p', {}, adapter.type || 'Network adapter')), badge(adapter.status, adapter.status === 'Up' ? 'good' : '')), el('div', {class: 'aside-primary'}, adapter.ssid || adapter.name), el('div', {class: 'aside-sub'}, adapter.isDefault ? 'Default adapter' : 'Active adapter'), el('dl', {class: 'mini-dl'}, el('dt', {}, 'IP address'), el('dd', {}, list(adapter.ipAddresses)[0] || 'Not reported'), el('dt', {}, 'Link speed'), el('dd', {}, linkSpeed(adapter.speed)), el('dt', {}, 'Gateway'), el('dd', {}, adapter.gateway || 'Not reported'))));
   } else put('connection-card', el('div', {class: 'aside-body'}, el('h2', {}, 'Your connection'), el('p', {class: 'aside-sub'}, state ? 'No active adapter reported.' : 'Waiting for adapter information.')));
+  const q = state?.diagnostics?.networkQuality;
+  if (q) {
+    const qBadgeClass = q.quality === 'Optimal' || q.quality === 'Good' ? 'good' : q.quality === 'Fair' ? 'blue' : 'bad';
+    text('nav-quality-val', (q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) + 'ms' : q.quality));
+    put('quality-card', el('div', {class: 'aside-body'},
+      el('div', {class: 'aside-top'},
+        el('span', {class: 'connection-icon'}, icon('activity')),
+        el('div', {}, el('h2', {}, 'Connection quality'), el('p', {}, 'Real-time latency')),
+        badge(q.quality, qBadgeClass)
+      ),
+      el('div', {class: 'quality-stat-row'},
+        el('div', {class: 'quality-stat'},
+          el('span', {class: 'quality-stat-label'}, 'Internet ping'),
+          el('span', {class: 'quality-stat-val'}, q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) : '—', el('small', {}, 'ms'))
+        ),
+        el('div', {class: 'quality-stat'},
+          el('span', {class: 'quality-stat-label'}, 'Gateway ping'),
+          el('span', {class: 'quality-stat-val'}, q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) : '—', el('small', {}, 'ms'))
+        )
+      ),
+      el('p', {class: 'budget-caption'}, 'Jitter: ' + (q.jitterMs ? q.jitterMs + 'ms' : '0ms') + ' · Loss: ' + q.packetLossPercent + '%'),
+      el('a', {href: '#diagnostics', class: 'text-link', style: 'margin-top: 8px; display: inline-block;'}, 'Run diagnostics →')
+    ));
+  } else {
+    put('quality-card', el('div', {class: 'aside-body'}, el('h2', {}, 'Connection quality'), el('p', {class: 'aside-sub'}, 'Measuring latency…')));
+  }
   const used = s ? num(s.monthReceived) + num(s.monthSent) : null;
   const budget = num(state?.settings?.budgetGb) * 1e9;
   const percent = budget && used !== null ? used / budget * 100 : 0;
@@ -319,13 +346,33 @@ function endpoint(address, port) {
 }
 function connectionTable(connections) {
   if (!connections.length) return pending('connections');
-  return table(['Application / PID', 'Protocol', 'Local endpoint', 'Remote endpoint', 'State'], connections.map(c => el('tr', {}, cell(el('div', {}, el('span', {class: 'app-name'}, c.app || 'Unknown application'), el('span', {class: 'app-secondary'}, 'PID ' + c.pid)), ''), cell(badge(c.protocol, c.protocol === 'TCP' ? 'blue' : '')), cell(endpoint(c.localAddress, c.localPort), 'number endpoint'), cell(endpoint(c.remoteAddress, c.remotePort), 'number endpoint'), cell(c.state || '—'))), 'connection-list');
+  return table(['Application / PID', 'Protocol', 'Local endpoint', 'Remote endpoint / Host', 'State'], connections.map(c => el('tr', {},
+    cell(el('div', {}, el('span', {class: 'app-name'}, c.app || 'Unknown application'), el('span', {class: 'app-secondary'}, 'PID ' + c.pid)), ''),
+    cell(badge(c.protocol, c.protocol === 'TCP' ? 'blue' : '')),
+    cell(endpoint(c.localAddress, c.localPort), 'number endpoint'),
+    cell(el('div', {},
+      el('span', {class: 'endpoint-addr'}, endpoint(c.remoteAddress, c.remotePort)),
+      c.remoteHost || c.service ? el('span', {class: 'endpoint-host'},
+        c.service ? el('span', {class: 'badge-subtle'}, c.service) : null,
+        c.remoteHost ? ' ' + c.remoteHost : ''
+      ) : null
+    ), 'number endpoint'),
+    cell(c.state || '—'))), 'connection-list');
 }
 function renderConnections() {
   const query = $('connection-search').value.trim().toLowerCase(), protocol = $('protocol-filter').value;
-  const connections = list(state?.connections).filter(c => (protocol === 'all' || c.protocol === protocol) && [c.app, c.pid, c.localAddress, c.localPort, c.remoteAddress, c.remotePort, c.state].join(' ').toLowerCase().includes(query));
+  const stateFilter = $('connection-state-filter')?.value || 'all';
+  const connections = list(state?.connections).filter(c =>
+    (protocol === 'all' || c.protocol === protocol) &&
+    (stateFilter === 'all' || (c.state && c.state.toLowerCase() === stateFilter.toLowerCase())) &&
+    [c.app, c.pid, c.localAddress, c.localPort, c.remoteAddress, c.remotePort, c.state, c.remoteHost || '', c.service || ''].join(' ').toLowerCase().includes(query)
+  );
   text('connection-count', state ? '(' + connections.length + ')' : '');
-  put('connections-table', state?.diagnostics?.connectionError && !connections.length ? empty('Connection snapshot unavailable', state.diagnostics.connectionError, 'info') : (query || protocol !== 'all') && !connections.length ? empty('No matching connections', 'Try a different endpoint, application, or protocol.', 'search') : connectionTable(connections));
+  put('connections-table', state?.diagnostics?.connectionError && !connections.length
+    ? empty('Connection snapshot unavailable', state.diagnostics.connectionError, 'info')
+    : (query || protocol !== 'all' || stateFilter !== 'all') && !connections.length
+      ? empty('No matching connections', 'Try a different endpoint, application, protocol, or state.', 'search')
+      : connectionTable(connections));
 }
 function openApp(app) { selectedApp = app; renderDetail(); $('app-dialog').showModal(); }
 function renderDetail() {
@@ -455,6 +502,57 @@ function renderNetwork() {
   text('network-summary', state ? adapters.length + ' adapters · ' + adapters.filter(a => a.status === 'Up').length + ' up' : 'Waiting for adapter information');
   put('adapter-list', adapters.length ? adapters.map(adapter => el('section', {class: 'panel'}, el('div', {class: 'panel-heading adapter-heading'}, el('div', {class: 'adapter-title'}, el('span', {class: 'connection-icon'}, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, adapter.name), el('p', {}, adapter.description || adapter.type))), el('div', {class: 'adapter-badges'}, badge(adapter.status || 'Unknown', adapter.status === 'Up' ? 'good' : ''), ...(adapter.isDefault ? [badge('Default route', 'blue')] : []))), el('div', {class: 'adapter-rates'}, el('div', {}, el('span', {}, 'Download'), el('strong', {class: 'download-text'}, bytes(adapter.downloadBps, true))), el('div', {}, el('span', {}, 'Upload'), el('strong', {class: 'upload-text'}, bytes(adapter.uploadBps, true)))), details([['Type', adapter.type], ['IP addresses', list(adapter.ipAddresses).join('\n')], ['Gateway', adapter.gateway], ['MAC address', adapter.mac], ['Link speed', linkSpeed(adapter.speed)], ...(adapter.type === 'Wi-Fi' || adapter.ssid ? [['Wi-Fi network', adapter.ssid], ['Signal', adapter.signal], ['Receive link', adapter.linkReceiveMbps ? adapter.linkReceiveMbps + ' Mbps' : null], ['Transmit link', adapter.linkTransmitMbps ? adapter.linkTransmitMbps + ' Mbps' : null]] : []), ['Adapter received', bytes(adapter.receivedBytes)], ['Adapter sent', bytes(adapter.sentBytes)]]))) : pending('network adapters'));
 }
+function renderDiagnostics() {
+  const q = state?.diagnostics?.networkQuality;
+  if (q) {
+    const qBadgeClass = q.quality === 'Optimal' || q.quality === 'Good' ? 'good' : q.quality === 'Fair' ? 'blue' : 'bad';
+    put('diag-quality-badge', badge(q.quality, qBadgeClass));
+    put('diag-metrics',
+      metric('Internet ping', q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) + ' ms' : '—', 'Tested against 1.1.1.1', 'activity', 'download-text'),
+      metric('Gateway ping', q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) + ' ms' : '—', 'Local router / Wi-Fi', 'activity', 'upload-text'),
+      metric('Jitter', q.jitterMs !== null && q.jitterMs !== undefined ? q.jitterMs + ' ms' : '—', 'Ping variation', 'activity'),
+      metric('Packet loss', q.packetLossPercent + '%', 'Recent test window', 'activity', q.packetLossPercent > 0 ? 'upload-text' : '')
+    );
+    text('diag-gateway-ip', 'Gateway: ' + (q.gatewayAddress || 'Not detected'));
+    renderPingChart(list(q.history));
+  }
+  const alerts = list(state?.alerts);
+  if (!alerts.length) {
+    put('alerts-table', el('div', {style: 'padding: 24px; text-align: center; color: var(--muted); font-size: 13px;'}, 'No active alerts. Network health and telemetry are normal.'));
+  } else {
+    put('alerts-table', table(['Time', 'Level', 'Event', 'Details'], alerts.map(a => el('tr', {},
+      cell(time(a.time), 'small'),
+      cell(badge(a.level.toUpperCase(), a.level === 'error' ? 'bad' : a.level === 'warning' ? 'warning' : 'blue')),
+      cell(el('strong', {}, a.title)),
+      cell(a.detail)
+    ))));
+  }
+}
+
+function renderPingChart(historyPoints) {
+  if (!historyPoints.length) { put('diag-ping-chart', pending('latency samples')); return; }
+  const container = $('diag-ping-chart');
+  const width = Math.max(280, (container.clientWidth || 400) - 26), height = 160;
+  const left = 45, right = width - 15, top = 15, bottom = height - 25;
+  const maxVal = Math.max(50, ...historyPoints.map(p => Math.max(num(p.internetMs), num(p.gatewayMs))));
+  const scaleY = val => bottom - (num(val) / maxVal) * (bottom - top);
+  const scaleX = i => left + (i / Math.max(1, historyPoints.length - 1)) * (right - left);
+
+  const netPath = historyPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + scaleX(i).toFixed(1) + ' ' + scaleY(p.internetMs).toFixed(1)).join(' ');
+  const gwPath = historyPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + scaleX(i).toFixed(1) + ' ' + scaleY(p.gatewayMs).toFixed(1)).join(' ');
+
+  const chartSvg = svg('svg', {viewBox: `0 0 ${width} ${height}`, style: `width: 100%; height: ${height}px; display: block;`},
+    svg('line', {x1: left, y1: top, x2: right, y2: top, stroke: 'var(--line)', 'stroke-dasharray': '2 2'}),
+    svg('line', {x1: left, y1: (top + bottom) / 2, x2: right, y2: (top + bottom) / 2, stroke: 'var(--line)', 'stroke-dasharray': '2 2'}),
+    svg('line', {x1: left, y1: bottom, x2: right, y2: bottom, stroke: 'var(--line)'}),
+    svg('text', {x: 6, y: top + 4, fill: 'var(--muted)', 'font-size': '10'}, Math.round(maxVal) + 'ms'),
+    svg('text', {x: 6, y: bottom - 2, fill: 'var(--muted)', 'font-size': '10'}, '0ms'),
+    svg('path', {d: netPath, fill: 'none', stroke: 'var(--blue)', 'stroke-width': '2'}),
+    svg('path', {d: gwPath, fill: 'none', stroke: 'var(--teal)', 'stroke-width': '2'})
+  );
+  put('diag-ping-chart', chartSvg);
+}
+
 function renderRouter() {
   const router = state?.router;
   const connected = router?.status === 'connected';
@@ -558,6 +656,19 @@ $('export-history').addEventListener('click', async () => {
   } catch (error) { message('history-message', error.message, 'error'); }
   finally { button.disabled = false; }
 });
+$('export-json')?.addEventListener('click', async () => {
+  const button = $('export-json'); button.disabled = true;
+  try {
+    const response = await fetch('/api/export?' + historyQuery() + '&format=json', {cache: 'no-store', headers: pairingHeaders(), signal: AbortSignal.timeout(20000)});
+    if (!response.ok) throw new Error('JSON export failed (' + response.status + '). Try again.');
+    const url = URL.createObjectURL(await response.blob());
+    const link = el('a', {href: url, download: 'flow-usage-' + historyRange + '-' + new Date().toISOString().slice(0, 10) + '.json'});
+    document.body.append(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    notify('Usage JSON exported.');
+  } catch (error) { message('history-message', error.message, 'error'); }
+  finally { button.disabled = false; }
+});
 $('budget-input').addEventListener('input', () => { budgetDirty = true; message('budget-message', ''); });
 $('budget-form').addEventListener('submit', async event => {
   event.preventDefault();
@@ -617,6 +728,88 @@ window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => { if (page === 'overview') renderLiveChart(); else if (page === 'history') renderHistory(); }, 150);
 });
+$('connection-state-filter')?.addEventListener('change', renderConnections);
+
+let speedTestRunning = false;
+$('run-speedtest')?.addEventListener('click', async () => {
+  if (speedTestRunning) return;
+  speedTestRunning = true;
+  $('run-speedtest').disabled = true;
+  text('speedtest-sub', 'Measuring latency & downloading test payload…');
+  text('speedtest-val', '…');
+  text('speedtest-msg', '');
+  try {
+    const res = await api('/api/diagnostics/speedtest', {method: 'POST', body: '{}'});
+    if (res.success) {
+      text('speedtest-val', res.downloadMbps);
+      text('speedtest-sub', 'Ping: ' + res.pingMs + 'ms · Duration: ' + res.durationSeconds + 's · Server: ' + res.server);
+      text('speedtest-msg', 'Successfully downloaded ' + bytes(res.bytesReceived) + ' via ' + res.server + '.');
+    } else {
+      text('speedtest-val', '—');
+      text('speedtest-sub', res.error || 'Speed test failed');
+    }
+  } catch (err) {
+    text('speedtest-val', '—');
+    text('speedtest-sub', err.message || 'Speed test failed');
+  } finally {
+    speedTestRunning = false;
+    $('run-speedtest').disabled = false;
+  }
+});
+
+let pingRunning = false;
+$('ping-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (pingRunning) return;
+  const host = $('ping-host').value.trim();
+  if (!host) return;
+  pingRunning = true;
+  const btn = $('ping-form').querySelector('button[type=submit]');
+  btn.disabled = true;
+  const out = $('ping-output');
+  out.hidden = false;
+  out.textContent = 'Pinging ' + host + '…';
+  try {
+    const res = await api('/api/diagnostics/ping?host=' + encodeURIComponent(host) + '&count=4');
+    out.textContent = list(res.logs).join('\n');
+  } catch (err) {
+    out.textContent = 'Ping error: ' + err.message;
+  } finally {
+    pingRunning = false;
+    btn.disabled = false;
+  }
+});
+
+let dnsRunning = false;
+$('dns-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (dnsRunning) return;
+  const domain = $('dns-domain').value.trim() || 'google.com';
+  dnsRunning = true;
+  const btn = $('dns-form').querySelector('button[type=submit]');
+  btn.disabled = true;
+  put('dns-results', el('p', {class: 'field-hint'}, 'Benchmarking DNS servers for ' + domain + '…'));
+  try {
+    const res = await api('/api/diagnostics/dns?name=' + encodeURIComponent(domain));
+    const cards = list(res.tests).map(t => {
+      const timeClass = !t.success ? 'fail' : t.elapsedMs < 30 ? 'fast' : t.elapsedMs < 100 ? 'normal' : 'slow';
+      return el('div', {class: 'dns-card'},
+        el('div', {},
+          el('div', {class: 'dns-card-name'}, t.server),
+          el('div', {class: 'dns-card-ips'}, t.success ? (list(t.addresses).join(', ') || 'Resolved') : t.error)
+        ),
+        el('div', {class: 'dns-card-time ' + timeClass}, t.success ? t.elapsedMs + ' ms' : 'Failed')
+      );
+    });
+    put('dns-results', ...cards);
+  } catch (err) {
+    put('dns-results', el('p', {class: 'form-message error'}, err.message));
+  } finally {
+    dnsRunning = false;
+    btn.disabled = false;
+  }
+});
+
 // Small invariant checks cover rate formatting and IPv6 endpoints without fabricated UI data.
 $('copy-mobile-link').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText($('mobile-link').value); notify('Phone pairing link copied.'); }

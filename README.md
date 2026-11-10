@@ -13,10 +13,13 @@ The project-local .NET 10 SDK has already been installed in `.tools/dotnet`. On 
 ## What it shows
 
 - Live download/upload chart, laptop session totals, today's totals, calendar-month totals, active programs and connection counts.
+- **Connection quality & latency monitoring**: Continuous Gateway and Internet (1.1.1.1) ping telemetry, jitter calculation, packet loss tracking, and an interactive sparkline chart.
+- **Host & service identification**: TCP/IPv6/UDP connections with automatic asynchronous reverse DNS resolution and well-known organization/service badges (Google, Microsoft, AWS, Cloudflare, GitHub, Apple, Meta, Steam, etc.).
+- **Interactive diagnostic tools**: Built-in Ping reachability tester, multi-resolver DNS benchmark (System, Cloudflare, Google, Quad9), and a live real-time bandwidth speed test.
+- **Network events & alerts**: Proactive timeline recording network disconnects, latency spikes, and severe packet loss.
 - Programs grouped by executable path, live transfer rates, cumulative bytes, protocols, process IDs and executable locations. Several browser processes belonging to the same executable are grouped together.
-- TCP IPv4/IPv6 connections and UDP bindings, with owning program, local/remote endpoint and state. UDP remote peers are not available from the Windows connection table and are shown as unspecified.
 - Wi-Fi, Ethernet, mobile and virtual adapters, link speed, addresses, gateway, MAC, Wi-Fi SSID and signal when Windows exposes them. Hidden filter layers are excluded. Virtual adapters are visible but do not inflate physical-adapter totals.
-- Daily, weekly and monthly history, program rankings and CSV export; a monthly laptop data budget is a visual alert, not a traffic limit.
+- Daily, weekly and monthly history, program rankings, and dual **CSV / JSON export**; a monthly laptop data budget is a visual alert, not a traffic limit.
 - App controls: per-executable network blocks, upload-rate caps, daily allowances with alert/block actions, edit/pause/remove rules, manual quota reset, and a local activity log. Guarded individual-process termination verifies both executable path and process start time.
 - A separate daily laptop budget with update/reset controls and automatic local-midnight renewal; resets retain raw usage history. Light and dark themes are saved per browser.
 - Optional ZLT E200 router login: available model, firmware, temperature, cellular network type, whole-router monthly traffic, and connected devices with band, signal and link speed. These are separate from laptop totals. No per-device usage is inferred from the router.

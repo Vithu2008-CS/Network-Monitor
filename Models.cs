@@ -11,7 +11,7 @@ public sealed record AdapterRow(string Id, string Name, string Description, stri
     double DownloadBps, double UploadBps, bool IsDefault, string? Ssid = null, string? Signal = null,
     string? LinkReceiveMbps = null, string? LinkTransmitMbps = null);
 public sealed record ConnectionRow(int Pid, string App, string Protocol, string LocalAddress, int LocalPort,
-    string RemoteAddress, int RemotePort, string State);
+    string RemoteAddress, int RemotePort, string State, string? RemoteHost = null, string? Service = null);
 public sealed record Point(DateTimeOffset Time, double DownloadBps, double UploadBps);
 public sealed record CollectorState(string Status, string Message, long EventsLost);
 public sealed record UsageTotals(long ReceivedBytes, long SentBytes);

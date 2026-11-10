@@ -8,7 +8,7 @@ using Microsoft.Diagnostics.Tracing.Session;
 
 namespace Flow;
 
-public sealed class MonitorService(TrafficStore store, RouterClient router, ILogger<MonitorService> logger) : BackgroundService
+public sealed class MonitorService(TrafficStore store, RouterClient router, NetworkDiagnostics diagnostics, ILogger<MonitorService> logger) : BackgroundService
 {
     private sealed class AppCounter(string id, string name, string path)
     {
@@ -71,7 +71,12 @@ public sealed class MonitorService(TrafficStore store, RouterClient router, ILog
                     activeApps = appRows.Count(a => a.DownloadBps > 0 || a.UploadBps > 0), connectionCount = connections.Length
                 },
                 series = points.ToArray(), apps = appRows, interfaces, connections, router = router.State,
-                settings = store.GetSettings(), access, diagnostics = new { historyError = store.LastError, connectionError }
+                settings = store.GetSettings(), access, diagnostics = new {
+                    historyError = store.LastError,
+                    connectionError,
+                    networkQuality = diagnostics.Quality
+                },
+                alerts = diagnostics.RecentAlerts()
             };
         }
     }

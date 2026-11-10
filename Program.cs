@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Flow;
 
 if (args.Contains("--self-test")) { SelfTest.Run(); return; }
@@ -23,6 +24,8 @@ builder.Logging.AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
 builder.Services.AddSingleton(new TrafficStore(Path.Combine(builder.Environment.ContentRootPath, "data", "usage.db")));
 builder.Services.AddSingleton<RouterClient>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<RouterClient>());
+builder.Services.AddSingleton<NetworkDiagnostics>();
+builder.Services.AddHostedService(sp => sp.GetRequiredService<NetworkDiagnostics>());
 builder.Services.AddSingleton<MonitorService>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<MonitorService>());
 builder.Services.AddSingleton<IWindowsRules, WindowsRules>();
@@ -55,11 +58,27 @@ app.MapGet("/api/history", (string? range, string? start, string? end, TrafficSt
     catch (ArgumentException ex) { return Results.BadRequest(new { message = ex.Message }); }
     catch (Microsoft.Data.Sqlite.SqliteException) { return Results.Json(new { message = "Local history is temporarily unavailable. Try Refresh again." }, statusCode: 503); }
 });
-app.MapGet("/api/export", (string? range, string? start, string? end, TrafficStore store) =>
+app.MapGet("/api/export", (string? range, string? start, string? end, string? format, TrafficStore store) =>
 {
     try
     {
         var history = store.History(range ?? "day", start, end);
+        if (string.Equals(format, "json", StringComparison.OrdinalIgnoreCase))
+        {
+            var exportObj = new
+            {
+                exportedAt = DateTimeOffset.Now,
+                range = history.Range,
+                startDate = history.StartDate,
+                endDate = history.EndDate,
+                totals = history.Totals,
+                daily = history.Daily,
+                apps = history.Apps,
+                storage = history.Storage
+            };
+            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(exportObj, new JsonSerializerOptions { WriteIndented = true });
+            return Results.File(jsonBytes, "application/json", $"flow-{history.Range}-{DateTime.Now:yyyy-MM-dd}.json");
+        }
         var text = new StringBuilder("Kind,Date,Program,Executable,Download bytes,Upload bytes\r\n");
         foreach (var a in history.Apps)
             text.AppendLine($"Application,,{Accounting.SafeCsv(a.Name)},{Accounting.SafeCsv(a.Path)},{a.ReceivedBytes},{a.SentBytes}");
@@ -70,6 +89,22 @@ app.MapGet("/api/export", (string? range, string? start, string? end, TrafficSto
     catch (ArgumentException ex) { return Results.BadRequest(new { message = ex.Message }); }
     catch (Microsoft.Data.Sqlite.SqliteException) { return Results.Json(new { message = "Local history is temporarily unavailable. Try the export again." }, statusCode: 503); }
 });
+app.MapGet("/api/diagnostics/quality", (NetworkDiagnostics diag) => diag.Quality);
+app.MapGet("/api/diagnostics/ping", async (string? host, int? count, NetworkDiagnostics diag, CancellationToken token) =>
+{
+    try { return Results.Ok(await diag.PingAsync(host ?? "", count ?? 4, token)); }
+    catch (ArgumentException ex) { return Results.BadRequest(new { message = ex.Message }); }
+});
+app.MapGet("/api/diagnostics/dns", async (string? name, NetworkDiagnostics diag, CancellationToken token) =>
+{
+    try { return Results.Ok(await diag.DnsBenchmarkAsync(name ?? "google.com", token)); }
+    catch (ArgumentException ex) { return Results.BadRequest(new { message = ex.Message }); }
+});
+app.MapPost("/api/diagnostics/speedtest", async (NetworkDiagnostics diag, CancellationToken token) =>
+{
+    return Results.Ok(await diag.SpeedTestAsync(token));
+});
+app.MapGet("/api/diagnostics/alerts", (NetworkDiagnostics diag) => diag.RecentAlerts());
 app.MapPost("/api/settings", (Settings settings, TrafficStore store) =>
 {
     try { store.SetSettings(settings); return Results.Ok(new { success = true, message = "Budget saved." }); }

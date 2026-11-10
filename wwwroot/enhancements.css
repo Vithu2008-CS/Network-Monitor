@@ -329,3 +329,48 @@ tbody tr:hover { background: var(--hover); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* Network Quality & Latency Card */
+.quality-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.quality-stat { background: var(--surface-alt); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); }
+.quality-stat-label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
+.quality-stat-val { font-size: 17px; font-weight: 600; color: var(--ink); }
+.quality-stat-val small { font-size: 11px; font-weight: normal; color: var(--muted); margin-left: 2px; }
+
+/* Diagnostics page grid */
+.diagnostics-grid, .diagnostics-tools-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 22px; margin-bottom: 24px; }
+.diag-metrics { grid-template-columns: repeat(4, 1fr); margin: 18px 23px; gap: 12px; }
+.diag-chart { height: 180px; padding: 10px 23px; }
+.speedtest-box { text-align: center; padding: 24px 16px; background: var(--surface-alt); border-radius: 12px; border: 1px solid var(--line); margin-bottom: 16px; }
+.speedtest-number { font-size: 48px; font-weight: 700; color: var(--blue); letter-spacing: -1px; line-height: 1; }
+.speedtest-unit { font-size: 18px; font-weight: 600; color: var(--muted); margin-left: 6px; }
+.speedtest-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+
+/* Inputs with inline action */
+.input-with-action { display: flex; gap: 8px; margin-top: 8px; margin-bottom: 12px; }
+.input-with-action input { flex: 1; border: 1px solid var(--border-control); border-radius: 7px; padding: 10px 12px; min-height: 41px; background: var(--surface); color: var(--ink); }
+
+/* Diagnostic Console Output */
+.diag-console { background: #0f172a; color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.6; padding: 14px; border-radius: 8px; overflow-x: auto; max-height: 220px; white-space: pre-wrap; margin-top: 14px; }
+:root[data-theme="dark"] .diag-console { background: #070d18; color: #7dd3fc; border: 1px solid #1e293b; }
+
+/* DNS Results */
+.dns-results { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.dns-card { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; background: var(--surface-alt); border: 1px solid var(--line); font-size: 12px; }
+.dns-card-name { font-weight: 600; color: var(--ink); }
+.dns-card-ips { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.dns-card-time { font-size: 14px; font-weight: 600; }
+.dns-card-time.fast { color: var(--success); }
+.dns-card-time.slow { color: var(--warning); }
+.dns-card-time.fail { color: var(--danger); }
+
+/* Endpoint host and service enhancements in Connections table */
+.endpoint-addr { display: block; font-family: monospace; font-size: 12px; }
+.endpoint-host { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.badge-subtle { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 600; border-radius: 4px; background: var(--selected); color: var(--blue); margin-right: 4px; }
+
+/* Mobile diagnostics layout */
+@media (max-width: 980px) {
+  .diagnostics-grid, .diagnostics-tools-grid { grid-template-columns: 1fr; }
+  .diag-metrics { grid-template-columns: repeat(2, 1fr); }
+}

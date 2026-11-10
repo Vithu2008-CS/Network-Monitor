@@ -49,6 +49,7 @@
       <a href="#overview" data-page="overview" aria-current="page"><svg class="icon"><use href="#i-overview"/></svg>Overview</a>
       <a href="#applications" data-page="applications"><svg class="icon"><use href="#i-apps"/></svg>Applications<span class="nav-count" id="nav-app-count">—</span></a>
       <a href="#connections" data-page="connections"><svg class="icon"><use href="#i-connections"/></svg>Connections</a>
+      <a href="#diagnostics" data-page="diagnostics"><svg class="icon"><use href="#i-activity"/></svg>Diagnostics<span class="nav-count" id="nav-quality-val">Ping</span></a>
       <a href="#history" data-page="history"><svg class="icon"><use href="#i-history"/></svg>History</a>
       <a href="#controls" data-page="controls"><svg class="icon"><use href="#i-shield"/></svg>App controls<span class="nav-tag">Admin</span></a>
       <a href="#network" data-page="network"><svg class="icon"><use href="#i-network"/></svg>Network</a>
@@ -77,7 +78,7 @@
         <div id="overview-budget-notice" class="quota-warning" hidden></div>
         <div class="overview-grid">
           <section class="panel traffic-panel"><div class="panel-heading"><div><h2>Network activity</h2><p>Live traffic across this laptop</p></div><label class="compact-label">Units<select id="chart-unit" aria-label="Chart rate units"><option value="auto">Auto</option><option value="1000">KB/s</option><option value="1000000">MB/s</option><option value="1000000000">GB/s</option></select></label></div><div class="chart-key"><span><i class="key-dot download"></i>Download</span><span><i class="key-dot upload"></i>Upload</span><span class="chart-caption" id="chart-caption">Waiting for samples</span></div><div id="live-chart" class="live-chart"></div><div class="panel-foot"><span id="live-window">Collected while Flow is running</span><span>Updates every 2 seconds</span></div></section>
-          <aside class="overview-aside"><section class="panel" id="connection-card"></section><section class="panel" id="budget-card"></section></aside>
+          <aside class="overview-aside"><section class="panel" id="connection-card"></section><section class="panel" id="quality-card"></section><section class="panel" id="budget-card"></section></aside>
         </div>
         <div class="section-heading"><div><h2>Application activity</h2><p>Traffic since this monitor started</p></div><a class="text-link" href="#applications">All applications<svg class="icon"><use href="#i-arrow"/></svg></a></div>
         <section class="panel table-panel"><div id="overview-apps"></div><div class="panel-foot"><span>Application totals may differ from adapter totals.</span><span id="overview-app-caption">Waiting for collection</span></div></section>
@@ -90,11 +91,11 @@
       </section>
 
       <section id="page-connections" class="page" aria-label="Connections" hidden>
-        <div class="toolbar"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="connection-search" type="search" placeholder="Search app, PID, address, or port" aria-label="Search connections" autocomplete="off"></label><label class="control-label">Protocol<select id="protocol-filter"><option value="all">All protocols</option><option value="TCP">TCP</option><option value="UDP">UDP</option></select></label></div><section class="panel table-panel"><div class="panel-heading"><h2>Open connections <span id="connection-count" class="count-label"></span></h2><span class="muted small">Current snapshot</span></div><div id="connections-table"></div></section><p class="page-note">Endpoints show addresses reported by Windows. UDP may not have a remote endpoint or connection state.</p>
+        <div class="toolbar"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="connection-search" type="search" placeholder="Search app, host, service, PID, or IP" aria-label="Search connections" autocomplete="off"></label><label class="control-label">Protocol<select id="protocol-filter"><option value="all">All protocols</option><option value="TCP">TCP</option><option value="UDP">UDP</option></select></label><label class="control-label">State<select id="connection-state-filter"><option value="all">All states</option><option value="Established">Established</option><option value="Listen">Listening</option><option value="Bound">Bound</option><option value="TimeWait">TimeWait</option><option value="CloseWait">CloseWait</option></select></label></div><section class="panel table-panel"><div class="panel-heading"><h2>Open connections <span id="connection-count" class="count-label"></span></h2><span class="muted small">Current snapshot with host &amp; service lookup</span></div><div id="connections-table"></div></section><p class="page-note">Endpoints show addresses reported by Windows with asynchronous hostname and service detection. UDP may not have a remote endpoint or connection state.</p>
       </section>
 
       <section id="page-history" class="page" aria-label="History" hidden>
-        <div class="toolbar"><div id="history-ranges" class="segmented" role="group" aria-label="History range"><button data-range="day" aria-pressed="true">Today</button><button data-range="week" aria-pressed="false">7 days</button><button data-range="month" aria-pressed="false">This month</button><button data-range="30days" aria-pressed="false">30 days</button><button data-range="custom" aria-pressed="false">Custom</button></div><div class="button-group"><button id="history-refresh" class="button">Refresh</button><button id="export-history" class="button"><svg class="icon"><use href="#i-export"/></svg>Export CSV</button></div></div>
+        <div class="toolbar"><div id="history-ranges" class="segmented" role="group" aria-label="History range"><button data-range="day" aria-pressed="true">Today</button><button data-range="week" aria-pressed="false">7 days</button><button data-range="month" aria-pressed="false">This month</button><button data-range="30days" aria-pressed="false">30 days</button><button data-range="custom" aria-pressed="false">Custom</button></div><div class="button-group"><button id="history-refresh" class="button">Refresh</button><button id="export-history" class="button"><svg class="icon"><use href="#i-export"/></svg>Export CSV</button><button id="export-json" class="button"><svg class="icon"><use href="#i-export"/></svg>Export JSON</button></div></div>
         <form id="history-dates" class="history-dates" hidden><label for="history-start">From<input id="history-start" type="date" required></label><label for="history-end">To<input id="history-end" type="date" required></label><button class="button button-primary" type="submit">Apply dates</button></form>
         <p id="history-message" class="form-message" role="status"></p>
         <div id="history-totals" class="metrics history-metrics"></div>
@@ -108,6 +109,60 @@
       </section>
 
       <section id="page-network" class="page" aria-label="Network adapters" hidden><div id="network-summary" class="subheading"></div><div id="adapter-list" class="adapter-grid"></div><p class="page-note">Adapter counters are reported by Windows and may span a different period than this monitor session. Virtual adapters can overlap physical traffic.</p></section>
+
+      <section id="page-diagnostics" class="page" aria-label="Diagnostics" hidden>
+        <div class="notice notice-info"><svg class="icon"><use href="#i-activity"/></svg><div><strong>Live Network Health &amp; Diagnostics</strong><p>Measure real-time latency, jitter, packet loss, DNS resolution times, and test bandwidth speed.</p></div></div>
+        <div class="diagnostics-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Connection quality &amp; latency</h2><p>Continuous ping telemetry</p></div><span id="diag-quality-badge" class="badge">Checking</span></div>
+            <div class="metrics diag-metrics" id="diag-metrics"></div>
+            <div class="chart-key"><span><i class="key-dot download"></i>Internet ping (1.1.1.1)</span><span><i class="key-dot upload"></i>Gateway ping</span></div>
+            <div id="diag-ping-chart" class="diag-chart"></div>
+            <div class="panel-foot"><span id="diag-gateway-ip">Gateway: Detecting</span><span>Tests every 3 seconds</span></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Bandwidth speed test</h2><p>Measure real download throughput and ping</p></div></div>
+            <div class="form-body">
+              <div class="speedtest-box">
+                <div class="speedtest-display"><span class="speedtest-number" id="speedtest-val">—</span><span class="speedtest-unit" id="speedtest-unit">Mbps</span></div>
+                <div class="speedtest-sub" id="speedtest-sub">Press run to measure throughput</div>
+              </div>
+              <button id="run-speedtest" class="button button-primary" type="button">Run speed test</button>
+              <p id="speedtest-msg" class="field-hint"></p>
+            </div>
+          </section>
+        </div>
+
+        <div class="diagnostics-tools-grid">
+          <section class="panel">
+            <div class="panel-heading"><div><h2>Ping diagnostic tool</h2><p>Test reachability and round-trip time</p></div></div>
+            <form id="ping-form" class="form-body">
+              <label for="ping-host">Target host or IP</label>
+              <div class="input-with-action">
+                <input id="ping-host" type="text" placeholder="e.g. google.com, 1.1.1.1, or router IP" required autocomplete="off">
+                <button class="button button-primary" type="submit">Ping</button>
+              </div>
+              <pre id="ping-output" class="diag-console" hidden></pre>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading"><div><h2>DNS benchmark test</h2><p>Compare resolution response times</p></div></div>
+            <form id="dns-form" class="form-body">
+              <label for="dns-domain">Domain to resolve</label>
+              <div class="input-with-action">
+                <input id="dns-domain" type="text" value="google.com" required autocomplete="off">
+                <button class="button button-primary" type="submit">Benchmark DNS</button>
+              </div>
+              <div id="dns-results" class="dns-results"></div>
+            </form>
+          </section>
+        </div>
+
+        <div class="section-heading"><div><h2>Network events &amp; alerts</h2><p>Automatic detection of connectivity drops, spikes, and state transitions</p></div></div>
+        <section class="panel table-panel"><div id="alerts-table"></div></section>
+      </section>
 
       <section id="page-router" class="page" aria-label="Router" hidden>
         <div class="notice notice-info"><svg class="icon"><use href="#i-router"/></svg><div><strong>A wider view of your network</strong><p>Optional, read-only access to your router at 192.168.8.1. Router totals cover the whole network, including other devices.</p></div></div>
@@ -146,6 +201,7 @@
     <a href="#overview" data-page="overview"><svg class="icon" aria-hidden="true"><use href="#i-overview"/></svg>Overview</a>
     <a href="#applications" data-page="applications"><svg class="icon" aria-hidden="true"><use href="#i-apps"/></svg>Apps</a>
     <a href="#connections" data-page="connections"><svg class="icon" aria-hidden="true"><use href="#i-connections"/></svg>Connections</a>
+    <a href="#diagnostics" data-page="diagnostics"><svg class="icon" aria-hidden="true"><use href="#i-activity"/></svg>Tools</a>
     <button id="menu-toggle" type="button" aria-label="More pages" aria-controls="sidebar" aria-expanded="false"><svg class="icon" aria-hidden="true"><use href="#i-menu"/></svg>More</button>
   </nav>
   <div id="toast" class="toast" role="status" hidden></div>
