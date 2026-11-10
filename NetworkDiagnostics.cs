@@ -506,3 +506,4 @@ public sealed class NetworkDiagnostics : BackgroundService
         return new SpeedTestResult(false, 0, 0, 0, 0, "None", "Speed test failed. Check internet connectivity.");
     }
 }
+

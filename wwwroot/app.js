@@ -7,7 +7,7 @@ if (location.hash.startsWith('#pair=')) {
   try { sessionStorage.setItem('flow-pairing-key', pairingKey); } catch { }
   history.replaceState(null, '', location.pathname + '#overview');
 }
-const pairingHeaders = () => pairingKey ? {'X-Flow-Key': pairingKey} : {};
+const pairingHeaders = () => pairingKey ? { 'X-Flow-Key': pairingKey } : {};
 
 const $ = id => document.getElementById(id);
 const list = value => Array.isArray(value) ? value : [];
@@ -49,7 +49,7 @@ function svg(tag, attrs = {}, ...children) {
   for (const child of children) node.append(child instanceof Node ? child : document.createTextNode(String(child)));
   return node;
 }
-function icon(name) { return svg('svg', {class: 'icon', 'aria-hidden': 'true'}, svg('use', {href: '#i-' + name})); }
+function icon(name) { return svg('svg', { class: 'icon', 'aria-hidden': 'true' }, svg('use', { href: '#i-' + name })); }
 function put(id, ...children) {
   const container = $(id), nodes = children.flat();
   if ((id === 'applications-table' || id === 'overview-apps') && nodes.length === 1 && reconcileApps(container, nodes[0])) return;
@@ -87,23 +87,23 @@ function bytes(value, perSecond = false) {
   let amount = num(value), unit = 0;
   const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
   while (amount >= 1000 && unit < units.length - 1) { amount /= 1000; unit++; }
-  return amount.toLocaleString(undefined, {maximumFractionDigits: amount < 10 && unit ? 2 : amount < 100 && unit ? 1 : 0}) + ' ' + units[unit] + (perSecond ? '/s' : '');
+  return amount.toLocaleString(undefined, { maximumFractionDigits: amount < 10 && unit ? 2 : amount < 100 && unit ? 1 : 0 }) + ' ' + units[unit] + (perSecond ? '/s' : '');
 }
 function count(value) { return value === undefined || value === null ? '—' : num(value).toLocaleString(); }
-function time(value, options = {hour: '2-digit', minute: '2-digit', second: '2-digit'}) {
+function time(value, options = { hour: '2-digit', minute: '2-digit', second: '2-digit' }) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleTimeString([], options);
 }
 function empty(title, detail, name = 'activity') {
-  return el('div', {class: 'empty-state'}, el('span', {class: 'empty-icon'}, icon(name)), el('strong', {}, title), el('p', {}, detail));
+  return el('div', { class: 'empty-state' }, el('span', { class: 'empty-icon' }, icon(name)), el('strong', {}, title), el('p', {}, detail));
 }
 function pending(noun) {
   return empty(stopped ? 'Monitor stopped' : state ? 'No ' + noun + ' yet' : 'Connecting to Flow', stopped ? 'Restart using Start Monitor.cmd.' : state ? 'New activity will appear here as it is collected.' : 'Waiting for the local monitoring service.');
 }
-function badge(label, kind = '') { return el('span', {class: 'badge ' + kind}, label); }
+function badge(label, kind = '') { return el('span', { class: 'badge ' + kind }, label); }
 function message(id, value, kind = '') { text(id, value); $(id).classList.toggle('error', kind === 'error'); $(id).classList.toggle('success', kind === 'success'); }
 function metric(label, value, note, name, color = '') {
-  return el('div', {class: 'metric'}, el('div', {class: 'metric-label'}, icon(name), label), el('div', {class: 'metric-value ' + color}, value), el('div', {class: 'metric-note'}, note));
+  return el('div', { class: 'metric' }, el('div', { class: 'metric-label' }, icon(name), label), el('div', { class: 'metric-value ' + color }, value), el('div', { class: 'metric-note' }, note));
 }
 function table(headers, rows, mobileLayout = '') {
   // Keep column associations in browsers that flatten table semantics for CSS grids.
@@ -116,16 +116,16 @@ function table(headers, rows, mobileLayout = '') {
       });
     }
   }
-  const head = el('tr', {role: 'row'}, headers.map((h, i) => el('th', {scope: 'col', role: 'columnheader', class: i > 0 ? 'number' : ''}, h)));
-  return el('div', {class: 'table-scroll ' + mobileLayout, tabindex: '0', role: 'region', 'aria-label': headers[0] + ' table'},
-    el('table', {role: 'table'}, el('thead', {role: 'rowgroup'}, head), el('tbody', {role: 'rowgroup'}, rows)));
+  const head = el('tr', { role: 'row' }, headers.map((h, i) => el('th', { scope: 'col', role: 'columnheader', class: i > 0 ? 'number' : '' }, h)));
+  return el('div', { class: 'table-scroll ' + mobileLayout, tabindex: '0', role: 'region', 'aria-label': headers[0] + ' table' },
+    el('table', { role: 'table' }, el('thead', { role: 'rowgroup' }, head), el('tbody', { role: 'rowgroup' }, rows)));
 }
-function cell(value, cls = 'number') { return el('td', {class: cls}, value); }
+function cell(value, cls = 'number') { return el('td', { class: cls }, value); }
 function details(entries) {
-  return el('dl', {class: 'details-list'}, entries.flatMap(([name, value]) => [el('dt', {}, name), el('dd', {}, value === '' || value === null || value === undefined ? 'Not reported' : value)]));
+  return el('dl', { class: 'details-list' }, entries.flatMap(([name, value]) => [el('dt', {}, name), el('dd', {}, value === '' || value === null || value === undefined ? 'Not reported' : value)]));
 }
 async function api(url, options = {}) {
-  const response = await fetch(url, {cache: 'no-store', ...options, signal: options.signal || AbortSignal.timeout(12000), headers: {...pairingHeaders(), ...(options.body ? {'Content-Type': 'application/json'} : {}), ...(options.method === 'POST' ? {'X-Flow-Request': '1'} : {}), ...options.headers}});
+  const response = await fetch(url, { cache: 'no-store', ...options, signal: options.signal || AbortSignal.timeout(12000), headers: { ...pairingHeaders(), ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...(options.method === 'POST' ? { 'X-Flow-Request': '1' } : {}), ...options.headers } });
   if (response.status === 403 && !['localhost', '127.0.0.1', '[::1]'].includes(location.hostname)) throw new Error('Open a fresh private phone link from Settings on the laptop. Only verified process termination is permitted from a paired phone.');
   let data;
   try { data = await response.json(); } catch { throw new Error('The service returned an unreadable response.'); }
@@ -193,7 +193,7 @@ function navigate() {
   document.title = pages[page][0] + ' · Flow';
   closeNav(); render();
   if (page !== previous && $('menu-toggle').getClientRects().length) {
-    $('main').focus({preventScroll: true});
+    $('main').focus({ preventScroll: true });
     window.scrollTo(0, 0);
   }
   if (page === 'history') loadHistory();
@@ -223,7 +223,7 @@ function render() {
   text('machine-name', state?.machineName || 'This laptop');
   text('nav-app-count', state ? count(state.summary.activeApps) : '—');
   if (state && !budgetDirty && document.activeElement !== $('budget-input')) $('budget-input').value = state.settings?.budgetGb ?? 0;
-  const renderers = {overview: renderOverview, applications: renderApps, connections: renderConnections, diagnostics: renderDiagnostics, history: renderHistory, network: renderNetwork, router: renderRouter, settings: renderSettings, controls: () => window.flowControls?.render()};
+  const renderers = { overview: renderOverview, applications: renderApps, connections: renderConnections, diagnostics: renderDiagnostics, history: renderHistory, network: renderNetwork, router: renderRouter, settings: renderSettings, controls: () => window.flowControls?.render() };
   renderers[page]();
   if ($('app-dialog').open) renderDetail();
   showHealth();
@@ -239,40 +239,40 @@ function renderOverview() {
   const adapters = list(state?.interfaces);
   const adapter = adapters.find(a => a.isDefault) || adapters.find(a => a.status === 'Up');
   if (adapter) {
-    put('connection-card', el('div', {class: 'aside-body'}, el('div', {class: 'aside-top'}, el('span', {class: 'connection-icon'}, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, 'Your connection'), el('p', {}, adapter.type || 'Network adapter')), badge(adapter.status, adapter.status === 'Up' ? 'good' : '')), el('div', {class: 'aside-primary'}, adapter.ssid || adapter.name), el('div', {class: 'aside-sub'}, adapter.isDefault ? 'Default adapter' : 'Active adapter'), el('dl', {class: 'mini-dl'}, el('dt', {}, 'IP address'), el('dd', {}, list(adapter.ipAddresses)[0] || 'Not reported'), el('dt', {}, 'Link speed'), el('dd', {}, linkSpeed(adapter.speed)), el('dt', {}, 'Gateway'), el('dd', {}, adapter.gateway || 'Not reported'))));
-  } else put('connection-card', el('div', {class: 'aside-body'}, el('h2', {}, 'Your connection'), el('p', {class: 'aside-sub'}, state ? 'No active adapter reported.' : 'Waiting for adapter information.')));
+    put('connection-card', el('div', { class: 'aside-body' }, el('div', { class: 'aside-top' }, el('span', { class: 'connection-icon' }, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, 'Your connection'), el('p', {}, adapter.type || 'Network adapter')), badge(adapter.status, adapter.status === 'Up' ? 'good' : '')), el('div', { class: 'aside-primary' }, adapter.ssid || adapter.name), el('div', { class: 'aside-sub' }, adapter.isDefault ? 'Default adapter' : 'Active adapter'), el('dl', { class: 'mini-dl' }, el('dt', {}, 'IP address'), el('dd', {}, list(adapter.ipAddresses)[0] || 'Not reported'), el('dt', {}, 'Link speed'), el('dd', {}, linkSpeed(adapter.speed)), el('dt', {}, 'Gateway'), el('dd', {}, adapter.gateway || 'Not reported'))));
+  } else put('connection-card', el('div', { class: 'aside-body' }, el('h2', {}, 'Your connection'), el('p', { class: 'aside-sub' }, state ? 'No active adapter reported.' : 'Waiting for adapter information.')));
   const q = state?.diagnostics?.networkQuality;
   if (q) {
     const qBadgeClass = q.quality === 'Optimal' || q.quality === 'Good' ? 'good' : q.quality === 'Fair' ? 'blue' : 'bad';
     text('nav-quality-val', (q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) + 'ms' : q.quality));
-    put('quality-card', el('div', {class: 'aside-body'},
-      el('div', {class: 'aside-top'},
-        el('span', {class: 'connection-icon'}, icon('activity')),
+    put('quality-card', el('div', { class: 'aside-body' },
+      el('div', { class: 'aside-top' },
+        el('span', { class: 'connection-icon' }, icon('activity')),
         el('div', {}, el('h2', {}, 'Connection quality'), el('p', {}, 'Real-time latency')),
         badge(q.quality, qBadgeClass)
       ),
-      el('div', {class: 'quality-stat-row'},
-        el('div', {class: 'quality-stat'},
-          el('span', {class: 'quality-stat-label'}, 'Internet ping'),
-          el('span', {class: 'quality-stat-val'}, q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) : '—', el('small', {}, 'ms'))
+      el('div', { class: 'quality-stat-row' },
+        el('div', { class: 'quality-stat' },
+          el('span', { class: 'quality-stat-label' }, 'Internet ping'),
+          el('span', { class: 'quality-stat-val' }, q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) : '—', el('small', {}, 'ms'))
         ),
-        el('div', {class: 'quality-stat'},
-          el('span', {class: 'quality-stat-label'}, 'Gateway ping'),
-          el('span', {class: 'quality-stat-val'}, q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) : '—', el('small', {}, 'ms'))
+        el('div', { class: 'quality-stat' },
+          el('span', { class: 'quality-stat-label' }, 'Gateway ping'),
+          el('span', { class: 'quality-stat-val' }, q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) : '—', el('small', {}, 'ms'))
         )
       ),
-      el('p', {class: 'budget-caption'}, 'Jitter: ' + (q.jitterMs ? q.jitterMs + 'ms' : '0ms') + ' · Loss: ' + q.packetLossPercent + '%'),
-      el('a', {href: '#diagnostics', class: 'text-link', style: 'margin-top: 8px; display: inline-block;'}, 'Run diagnostics →')
+      el('p', { class: 'budget-caption' }, 'Jitter: ' + (q.jitterMs ? q.jitterMs + 'ms' : '0ms') + ' · Loss: ' + q.packetLossPercent + '%'),
+      el('a', { href: '#diagnostics', class: 'text-link', style: 'margin-top: 8px; display: inline-block;' }, 'Run diagnostics →')
     ));
   } else {
-    put('quality-card', el('div', {class: 'aside-body'}, el('h2', {}, 'Connection quality'), el('p', {class: 'aside-sub'}, 'Measuring latency…')));
+    put('quality-card', el('div', { class: 'aside-body' }, el('h2', {}, 'Connection quality'), el('p', { class: 'aside-sub' }, 'Measuring latency…')));
   }
   const used = s ? num(s.monthReceived) + num(s.monthSent) : null;
   const budget = num(state?.settings?.budgetGb) * 1e9;
   const percent = budget && used !== null ? used / budget * 100 : 0;
-  const progress = el('div', {class: 'progress' + (percent > 100 ? ' exceeded' : ''), role: 'progressbar', 'aria-label': 'Monthly budget used', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': Math.min(100, percent).toFixed(1), 'aria-valuetext': percent.toFixed(1) + '% used'});
+  const progress = el('div', { class: 'progress' + (percent > 100 ? ' exceeded' : ''), role: 'progressbar', 'aria-label': 'Monthly budget used', 'aria-valuemin': '0', 'aria-valuemax': '100', 'aria-valuenow': Math.min(100, percent).toFixed(1), 'aria-valuetext': percent.toFixed(1) + '% used' });
   const fill = el('span'); fill.style.width = Math.min(100, percent) + '%'; progress.append(fill);
-  put('budget-card', el('div', {class: 'aside-body'}, el('div', {class: 'aside-heading'}, el('h2', {}, 'This month'), el('a', {href: '#settings', class: 'text-link'}, 'Set budget')), el('div', {class: 'budget-value'}, bytes(used), el('small', {}, budget ? ' of ' + bytes(budget) : ' collected')), ...(budget ? [progress, el('p', {class: 'budget-caption'}, percent.toFixed(1) + '% of monthly budget')] : [el('p', {class: 'budget-caption'}, 'No budget set. Add an allowance in Settings.')] )));
+  put('budget-card', el('div', { class: 'aside-body' }, el('div', { class: 'aside-heading' }, el('h2', {}, 'This month'), el('a', { href: '#settings', class: 'text-link' }, 'Set budget')), el('div', { class: 'budget-value' }, bytes(used), el('small', {}, budget ? ' of ' + bytes(budget) : ' collected')), ...(budget ? [progress, el('p', { class: 'budget-caption' }, percent.toFixed(1) + '% of monthly budget')] : [el('p', { class: 'budget-caption' }, 'No budget set. Add an allowance in Settings.')])));
   const apps = list(state?.apps).slice().sort((a, b) => rate(b) - rate(a) || total(b) - total(a));
   put('overview-apps', appTable(apps.slice(0, 5)));
   text('overview-app-caption', state ? count(apps.length) + ' applications observed' : 'Waiting for collection');
@@ -286,7 +286,7 @@ function renderLiveChart() {
   const peak = Math.max(...points.map(p => Math.max(num(p.downloadBps), num(p.uploadBps))));
   const unit = $('chart-unit').value;
   const factor = unit === 'auto' ? peak >= 1e9 ? 1e9 : peak >= 1e6 ? 1e6 : peak >= 1000 ? 1000 : 1 : Number(unit);
-  const suffix = {1: 'B/s', 1000: 'KB/s', 1000000: 'MB/s', 1000000000: 'GB/s'}[factor];
+  const suffix = { 1: 'B/s', 1000: 'KB/s', 1000000: 'MB/s', 1000000000: 'GB/s' }[factor];
   const rough = (peak || factor) / 4;
   const power = 10 ** Math.floor(Math.log10(rough));
   const tick = [1, 2, 5, 10].find(n => n * power >= rough) * power;
@@ -294,20 +294,20 @@ function renderLiveChart() {
   const start = new Date(points[0].time).getTime(), end = new Date(points.at(-1).time).getTime();
   const x = point => start === end ? (left + right) / 2 : left + (new Date(point.time).getTime() - start) / (end - start) * (right - left);
   const y = value => bottom - num(value) / max * (bottom - top);
-  const chart = svg('svg', {viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': 'Live download and upload traffic. Peak ' + bytes(peak, true) + '. From ' + time(points[0].time) + ' to ' + time(points.at(-1).time)}, svg('title', {}, 'Live network traffic'));
+  const chart = svg('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': 'Live download and upload traffic. Peak ' + bytes(peak, true) + '. From ' + time(points[0].time) + ' to ' + time(points.at(-1).time) }, svg('title', {}, 'Live network traffic'));
   for (let i = 0; i <= 4; i++) {
     const value = max * i / 4, yy = y(value);
-    chart.append(svg('line', {x1: left, x2: right, y1: yy, y2: yy, class: 'chart-grid'}), svg('text', {x: left - 11, y: yy + 4, 'text-anchor': 'end', class: 'chart-label'}, (value / factor).toLocaleString(undefined, {maximumFractionDigits: 2}) + ' ' + suffix));
+    chart.append(svg('line', { x1: left, x2: right, y1: yy, y2: yy, class: 'chart-grid' }), svg('text', { x: left - 11, y: yy + 4, 'text-anchor': 'end', class: 'chart-label' }, (value / factor).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' ' + suffix));
   }
   for (const [field, color] of [['downloadBps', '#2859df'], ['uploadBps', '#008978']]) {
     const path = points.map((point, i) => (i ? 'L' : 'M') + x(point).toFixed(2) + ',' + y(point[field]).toFixed(2)).join(' ');
-    if (field === 'downloadBps' && points.length > 1) chart.append(svg('path', {d: path + ` L${x(points.at(-1))},${bottom} L${x(points[0])},${bottom} Z`, fill: '#2859df', opacity: '.06'}));
-    chart.append(svg('path', {d: path, stroke: color, class: 'chart-line'}));
+    if (field === 'downloadBps' && points.length > 1) chart.append(svg('path', { d: path + ` L${x(points.at(-1))},${bottom} L${x(points[0])},${bottom} Z`, fill: '#2859df', opacity: '.06' }));
+    chart.append(svg('path', { d: path, stroke: color, class: 'chart-line' }));
     const last = points.at(-1);
-    chart.append(svg('circle', {cx: x(last), cy: y(last[field]), r: 3.2, fill: color}, svg('title', {}, bytes(last[field], true) + ' at ' + time(last.time))));
+    chart.append(svg('circle', { cx: x(last), cy: y(last[field]), r: 3.2, fill: color }, svg('title', {}, bytes(last[field], true) + ' at ' + time(last.time))));
   }
   const labels = points.length === 1 ? [0] : [0, Math.floor((points.length - 1) / 2), points.length - 1];
-  for (const i of [...new Set(labels)]) chart.append(svg('text', {x: x(points[i]), y: height - 8, 'text-anchor': i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle', class: 'chart-label'}, time(points[i].time, {hour: '2-digit', minute: '2-digit'})));
+  for (const i of [...new Set(labels)]) chart.append(svg('text', { x: x(points[i]), y: height - 8, 'text-anchor': i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle', class: 'chart-label' }, time(points[i].time, { hour: '2-digit', minute: '2-digit' })));
   put('live-chart', chart);
   text('chart-caption', 'Peak ' + bytes(peak, true));
   text('live-window', 'Physical adapters · ' + points.length + ' samples');
@@ -316,26 +316,26 @@ function appTable(apps) {
   if (!apps.length) return state?.collector?.status === 'needs-admin' ? empty('Application capture needs administrator access', 'Launch Start Monitor.cmd and approve Windows elevation. Adapter totals are still available.', 'shield') : pending('applications');
   const max = Math.max(1, ...apps.map(total));
   return table(['Application', 'Downloaded', 'Uploaded', 'Total usage', 'Connections', 'Current traffic', 'Actions'], apps.map(app => {
-    const button = el('button', {class: 'app-name-button', type: 'button', 'data-app-id': app.id}, app.name || 'Unknown application');
+    const button = el('button', { class: 'app-name-button', type: 'button', 'data-app-id': app.id }, app.name || 'Unknown application');
     button.addEventListener('click', () => openApp(app));
-    const track = el('span', {class: 'usage-track', 'aria-hidden': 'true'}, el('span'));
+    const track = el('span', { class: 'usage-track', 'aria-hidden': 'true' }, el('span'));
     track.firstChild.style.width = total(app) / max * 100 + '%';
-    return el('tr', {}, cell(el('div', {class: 'app-cell'}, el('span', {class: 'app-avatar', 'aria-hidden': 'true'}, String(app.name || '?').slice(0, 1).toUpperCase()), el('div', {class: 'app-name'}, button, el('span', {class: 'app-secondary'}, list(app.pids).length ? 'PID ' + app.pids.join(', ') : 'No current connection'))), ''), cell(bytes(app.receivedBytes), 'number download-text'), cell(bytes(app.sentBytes), 'number upload-text'), cell(el('div', {class: 'usage-cell'}, bytes(total(app)), track)), cell(count(app.connectionCount)), cell(bytes(rate(app), true), 'number rate-cell'), cell(appActions(app), 'app-actions'));
+    return el('tr', {}, cell(el('div', { class: 'app-cell' }, el('span', { class: 'app-avatar', 'aria-hidden': 'true' }, String(app.name || '?').slice(0, 1).toUpperCase()), el('div', { class: 'app-name' }, button, el('span', { class: 'app-secondary' }, list(app.pids).length ? 'PID ' + app.pids.join(', ') : 'No current connection'))), ''), cell(bytes(app.receivedBytes), 'number download-text'), cell(bytes(app.sentBytes), 'number upload-text'), cell(el('div', { class: 'usage-cell' }, bytes(total(app)), track)), cell(count(app.connectionCount)), cell(bytes(rate(app), true), 'number rate-cell'), cell(appActions(app), 'app-actions'));
   }), 'app-list');
 }
 function appActions(app) {
-  const access = window.flowControls?.access(app) || {allowed: false, reason: 'Application controls are loading.'};
-  const limits = el('button', {class: 'button row-limit-button', type: 'button', 'data-row-action': 'limits', title: access.reason || 'Set limits for ' + app.name, disabled: access.allowed ? null : ''}, 'Limits');
-  const end = el('button', {class: 'button row-end-button', type: 'button', 'data-row-action': 'end', title: access.endReason || 'Select a running process of ' + app.name + ' to end', disabled: access.canEnd ? null : ''}, 'End process');
+  const access = window.flowControls?.access(app) || { allowed: false, reason: 'Application controls are loading.' };
+  const limits = el('button', { class: 'button row-limit-button', type: 'button', 'data-row-action': 'limits', title: access.reason || 'Set limits for ' + app.name, disabled: access.allowed ? null : '' }, 'Limits');
+  const end = el('button', { class: 'button row-end-button', type: 'button', 'data-row-action': 'end', title: access.endReason || 'Select a running process of ' + app.name + ' to end', disabled: access.canEnd ? null : '' }, 'End process');
   limits.addEventListener('click', () => window.flowControls?.openRule(app));
   end.addEventListener('click', () => window.flowControls?.openProcesses(app));
-  return el('div', {class: 'row-actions'}, limits, end);
+  return el('div', { class: 'row-actions' }, limits, end);
 }
 function renderApps() {
   const query = $('app-search').value.trim().toLowerCase();
   const filter = $('app-filter').value;
   const apps = list(state?.apps).filter(a => [a.name, a.path, ...list(a.pids)].join(' ').toLowerCase().includes(query) && (filter !== 'connected' || a.connectionCount > 0) && (filter !== 'transferring' || rate(a) > 0));
-  const comparators = {rate: (a, b) => rate(b) - rate(a), total: (a, b) => total(b) - total(a), download: (a, b) => num(b.receivedBytes) - num(a.receivedBytes), upload: (a, b) => num(b.sentBytes) - num(a.sentBytes), name: (a, b) => String(a.name).localeCompare(String(b.name)), connections: (a, b) => num(b.connectionCount) - num(a.connectionCount)};
+  const comparators = { rate: (a, b) => rate(b) - rate(a), total: (a, b) => total(b) - total(a), download: (a, b) => num(b.receivedBytes) - num(a.receivedBytes), upload: (a, b) => num(b.sentBytes) - num(a.sentBytes), name: (a, b) => String(a.name).localeCompare(String(b.name)), connections: (a, b) => num(b.connectionCount) - num(a.connectionCount) };
   apps.sort(comparators[$('app-sort').value]);
   text('app-count', state ? '(' + apps.length + ')' : '');
   put('applications-table', query && !apps.length ? empty('No matching applications', 'Try another application name, executable path, or PID.', 'search') : appTable(apps));
@@ -347,13 +347,13 @@ function endpoint(address, port) {
 function connectionTable(connections) {
   if (!connections.length) return pending('connections');
   return table(['Application / PID', 'Protocol', 'Local endpoint', 'Remote endpoint / Host', 'State'], connections.map(c => el('tr', {},
-    cell(el('div', {}, el('span', {class: 'app-name'}, c.app || 'Unknown application'), el('span', {class: 'app-secondary'}, 'PID ' + c.pid)), ''),
+    cell(el('div', {}, el('span', { class: 'app-name' }, c.app || 'Unknown application'), el('span', { class: 'app-secondary' }, 'PID ' + c.pid)), ''),
     cell(badge(c.protocol, c.protocol === 'TCP' ? 'blue' : '')),
     cell(endpoint(c.localAddress, c.localPort), 'number endpoint'),
     cell(el('div', {},
-      el('span', {class: 'endpoint-addr'}, endpoint(c.remoteAddress, c.remotePort)),
-      c.remoteHost || c.service ? el('span', {class: 'endpoint-host'},
-        c.service ? el('span', {class: 'badge-subtle'}, c.service) : null,
+      el('span', { class: 'endpoint-addr' }, endpoint(c.remoteAddress, c.remotePort)),
+      c.remoteHost || c.service ? el('span', { class: 'endpoint-host' },
+        c.service ? el('span', { class: 'badge-subtle' }, c.service) : null,
         c.remoteHost ? ' ' + c.remoteHost : ''
       ) : null
     ), 'number endpoint'),
@@ -382,7 +382,7 @@ function renderDetail() {
   window.flowControls?.selectApp(app);
   text('detail-title', app.name || 'Unknown application');
   const connections = list(state?.connections).filter(c => list(app.pids).includes(c.pid));
-  put('app-detail', el('div', {class: 'metrics'}, metric('Downloaded', bytes(app.receivedBytes), 'Since monitor started', 'down', 'download-text'), metric('Uploaded', bytes(app.sentBytes), 'Since monitor started', 'up', 'upload-text')), el('section', {class: 'panel'}, details([['Executable', app.path], ['Process IDs', list(app.pids).join(', ') || 'No current process'], ['Protocols', list(app.protocols).join(', ')], ['Current traffic', bytes(rate(app), true)], ['Last seen', time(app.lastSeen)]])), el('h3', {}, 'Current connections (' + connections.length + ')'), el('section', {class: 'panel table-panel'}, connectionTable(connections)), el('p', {class: 'page-note'}, 'Kernel TCP/IP counters can differ from physical-adapter totals, especially with VPN traffic. Totals cover this monitor session.'));
+  put('app-detail', el('div', { class: 'metrics' }, metric('Downloaded', bytes(app.receivedBytes), 'Since monitor started', 'down', 'download-text'), metric('Uploaded', bytes(app.sentBytes), 'Since monitor started', 'up', 'upload-text')), el('section', { class: 'panel' }, details([['Executable', app.path], ['Process IDs', list(app.pids).join(', ') || 'No current process'], ['Protocols', list(app.protocols).join(', ')], ['Current traffic', bytes(rate(app), true)], ['Last seen', time(app.lastSeen)]])), el('h3', {}, 'Current connections (' + connections.length + ')'), el('section', { class: 'panel table-panel' }, connectionTable(connections)), el('p', { class: 'page-note' }, 'Kernel TCP/IP counters can differ from physical-adapter totals, especially with VPN traffic. Totals cover this monitor session.'));
 }
 
 async function loadHistory() {
@@ -431,51 +431,51 @@ function renderHistory() {
   const storage = data.storage;
   text('history-storage-status', storage ? storage.error ? 'SQLite · save needs attention' : 'SQLite · saved on this laptop' : 'Local SQLite history');
   put('history-storage', storage ? details([['Database file', storage.file], ['Database size', bytes(storage.databaseBytes) + ' allocated; journal files can add temporary space'],
-    ['Saved dates', storage.firstDay ? dateLabel(storage.firstDay) + ' – ' + dateLabel(storage.lastDay) : 'Waiting for samples'],
-    ['Recorded days', count(storage.recordedDays)], ['Retention', 'Kept until you remove the local data'],
-    ['Save status', storage.error || 'Writing automatically about every 2 seconds'],
-    ['Waiting to save', count(storage.pendingMinutes) + ' sampled minute(s)']]) : el('p', {class: 'page-note'}, 'Restart Flow to load storage details from the updated service.'));
+  ['Saved dates', storage.firstDay ? dateLabel(storage.firstDay) + ' – ' + dateLabel(storage.lastDay) : 'Waiting for samples'],
+  ['Recorded days', count(storage.recordedDays)], ['Retention', 'Kept until you remove the local data'],
+  ['Save status', storage.error || 'Writing automatically about every 2 seconds'],
+  ['Waiting to save', count(storage.pendingMinutes) + ' sampled minute(s)']]) : el('p', { class: 'page-note' }, 'Restart Flow to load storage details from the updated service.'));
   put('history-days', days.length ? table(['Date', 'Downloaded', 'Uploaded', 'Total usage'], days.slice().reverse().map(day => {
-    const button = el('button', {class: 'history-day-button', type: 'button', 'aria-label': 'View app usage for ' + day.date}, dateLabel(day.date));
+    const button = el('button', { class: 'history-day-button', type: 'button', 'aria-label': 'View app usage for ' + day.date }, dateLabel(day.date));
     button.addEventListener('click', () => {
       historyRange = 'custom'; historyFrom = day.date; historyTo = day.date;
       $('history-start').value = day.date; $('history-end').value = day.date;
-      loadHistory(); $('page-history').scrollIntoView({block: 'start'});
+      loadHistory(); $('page-history').scrollIntoView({ block: 'start' });
     });
     const coverage = day.sampledMinutes == null ? 'Saved usage' : day.sampledMinutes + ' sampled minute(s)';
-    return el('tr', {}, cell(el('div', {}, button, el('span', {class: 'app-secondary'}, coverage)), ''), cell(bytes(day.receivedBytes), 'number download-text'), cell(bytes(day.sentBytes), 'number upload-text'), cell(bytes(total(day))));
+    return el('tr', {}, cell(el('div', {}, button, el('span', { class: 'app-secondary' }, coverage)), ''), cell(bytes(day.receivedBytes), 'number download-text'), cell(bytes(day.sentBytes), 'number upload-text'), cell(bytes(total(day))));
   }), 'history-day-list') : empty('No daily records', 'Choose another date range to explore earlier collection.', 'history'));
   const query = $('history-search').value.trim().toLowerCase();
   const allApps = list(data.apps);
   const apps = allApps.filter(app => [app.name, app.path].join(' ').toLowerCase().includes(query));
-  const comparators = {total: (a, b) => total(b) - total(a), download: (a, b) => num(b.receivedBytes) - num(a.receivedBytes), upload: (a, b) => num(b.sentBytes) - num(a.sentBytes), name: (a, b) => String(a.name).localeCompare(String(b.name))};
+  const comparators = { total: (a, b) => total(b) - total(a), download: (a, b) => num(b.receivedBytes) - num(a.receivedBytes), upload: (a, b) => num(b.sentBytes) - num(a.sentBytes), name: (a, b) => String(a.name).localeCompare(String(b.name)) };
   apps.sort(comparators[$('history-sort').value]);
   const appTotal = allApps.reduce((sum, app) => sum + total(app), 0);
   text('history-app-caption', apps.length + ' of ' + allApps.length + ' applications · ' + bytes(appTotal) + ' measured app traffic');
   put('history-apps', apps.length ? table(['Application', 'Downloaded', 'Uploaded', 'Total usage', 'App share'], apps.map(app => {
     const share = appTotal ? total(app) / appTotal * 100 : 0;
-    const progress = el('progress', {max: 100, value: share, 'aria-label': app.name + ' share of measured application traffic'});
-    return el('tr', {}, cell(el('div', {}, el('span', {class: 'app-name'}, app.name || 'Unknown application'), el('span', {class: 'app-secondary', title: app.path || ''}, app.path || 'Path not reported')), ''), cell(bytes(app.receivedBytes), 'number download-text'), cell(bytes(app.sentBytes), 'number upload-text'), cell(bytes(total(app))), cell(el('div', {class: 'history-share'}, share.toFixed(1) + '%', progress)));
+    const progress = el('progress', { max: 100, value: share, 'aria-label': app.name + ' share of measured application traffic' });
+    return el('tr', {}, cell(el('div', {}, el('span', { class: 'app-name' }, app.name || 'Unknown application'), el('span', { class: 'app-secondary', title: app.path || '' }, app.path || 'Path not reported')), ''), cell(bytes(app.receivedBytes), 'number download-text'), cell(bytes(app.sentBytes), 'number upload-text'), cell(bytes(total(app))), cell(el('div', { class: 'history-share' }, share.toFixed(1) + '%', progress)));
   }), 'history-app-list') : empty(query ? 'No matching applications' : 'No application usage recorded', query ? 'Try another name or executable path.' : 'Application usage is saved while administrator capture runs.', 'apps'));
 }
 function historyQuery() {
-  const params = new URLSearchParams({range: historyRange});
+  const params = new URLSearchParams({ range: historyRange });
   if (historyRange === 'custom') { params.set('start', historyFrom); params.set('end', historyTo); }
   return params.toString();
 }
 function dateLabel(value) {
   const date = new Date(value + 'T12:00:00');
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(undefined, {month: 'short', day: 'numeric', year: 'numeric'});
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 function renderHistoryChart(days) {
   if (!days.length) { put('history-chart', empty('No usage recorded in this period', 'History starts when the monitor runs. Select another period to inspect earlier local records.', 'history')); return; }
   const width = Math.max(240, $('history-chart').clientWidth - 32), height = 260;
   const left = 65, right = width - 12, top = 15, bottom = 222;
   const max = Math.max(1, ...days.map(total)) * 1.1;
-  const chart = svg('svg', {viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': 'Daily physical-adapter usage. ' + days.map(d => d.date + ': ' + bytes(d.receivedBytes) + ' downloaded, ' + bytes(d.sentBytes) + ' uploaded').join('; ')}, svg('title', {}, 'Daily network usage'));
+  const chart = svg('svg', { viewBox: `0 0 ${width} ${height}`, role: 'img', 'aria-label': 'Daily physical-adapter usage. ' + days.map(d => d.date + ': ' + bytes(d.receivedBytes) + ' downloaded, ' + bytes(d.sentBytes) + ' uploaded').join('; ') }, svg('title', {}, 'Daily network usage'));
   for (let i = 0; i <= 4; i++) {
     const value = max * i / 4, y = bottom - value / max * (bottom - top);
-    chart.append(svg('line', {x1: left, x2: right, y1: y, y2: y, class: 'chart-grid'}), svg('text', {x: left - 10, y: y + 4, 'text-anchor': 'end', class: 'chart-label'}, bytes(value)));
+    chart.append(svg('line', { x1: left, x2: right, y1: y, y2: y, class: 'chart-grid' }), svg('text', { x: left - 10, y: y + 4, 'text-anchor': 'end', class: 'chart-label' }, bytes(value)));
   }
   const firstDate = historyData?.startDate || days[0].date, lastDate = historyData?.endDate || days.at(-1).date;
   const first = Date.parse(firstDate), length = Math.round((Date.parse(lastDate) - first) / 86400000) + 1;
@@ -484,23 +484,23 @@ function renderHistoryChart(days) {
     const index = Math.round((Date.parse(day.date) - first) / 86400000);
     const x = left + step * (index + .5), downloadHeight = num(day.receivedBytes) / max * (bottom - top), uploadHeight = num(day.sentBytes) / max * (bottom - top);
     const group = svg('g', {}, svg('title', {}, day.date + ': ' + bytes(day.receivedBytes) + ' downloaded, ' + bytes(day.sentBytes) + ' uploaded'));
-    group.append(svg('rect', {x: x - barWidth / 2, y: bottom - downloadHeight, width: barWidth, height: downloadHeight, fill: 'var(--blue)', rx: '2'}), svg('rect', {x: x - barWidth / 2, y: bottom - downloadHeight - uploadHeight, width: barWidth, height: uploadHeight, fill: 'var(--teal)', rx: '2'}));
+    group.append(svg('rect', { x: x - barWidth / 2, y: bottom - downloadHeight, width: barWidth, height: downloadHeight, fill: 'var(--blue)', rx: '2' }), svg('rect', { x: x - barWidth / 2, y: bottom - downloadHeight - uploadHeight, width: barWidth, height: uploadHeight, fill: 'var(--teal)', rx: '2' }));
     chart.append(group);
     if (i % Math.max(1, Math.ceil(days.length / (width < 500 ? 4 : 8))) === 0 || i === days.length - 1) {
       const date = new Date(day.date + 'T12:00:00');
-      chart.append(svg('text', {x, y: 247, 'text-anchor': 'middle', class: 'chart-label'}, Number.isNaN(date.getTime()) ? day.date : date.toLocaleDateString([], {month: 'short', day: 'numeric'})));
+      chart.append(svg('text', { x, y: 247, 'text-anchor': 'middle', class: 'chart-label' }, Number.isNaN(date.getTime()) ? day.date : date.toLocaleDateString([], { month: 'short', day: 'numeric' })));
     }
   });
   put('history-chart', chart);
 }
 function linkSpeed(value) {
   if (!Number.isFinite(value) || value <= 0) return 'Not reported';
-  return value >= 1e9 ? (value / 1e9).toLocaleString(undefined, {maximumFractionDigits: 2}) + ' Gbps' : (value / 1e6).toLocaleString(undefined, {maximumFractionDigits: 1}) + ' Mbps';
+  return value >= 1e9 ? (value / 1e9).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' Gbps' : (value / 1e6).toLocaleString(undefined, { maximumFractionDigits: 1 }) + ' Mbps';
 }
 function renderNetwork() {
   const adapters = list(state?.interfaces).slice().sort((a, b) => Number(!!b.isDefault) - Number(!!a.isDefault));
   text('network-summary', state ? adapters.length + ' adapters · ' + adapters.filter(a => a.status === 'Up').length + ' up' : 'Waiting for adapter information');
-  put('adapter-list', adapters.length ? adapters.map(adapter => el('section', {class: 'panel'}, el('div', {class: 'panel-heading adapter-heading'}, el('div', {class: 'adapter-title'}, el('span', {class: 'connection-icon'}, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, adapter.name), el('p', {}, adapter.description || adapter.type))), el('div', {class: 'adapter-badges'}, badge(adapter.status || 'Unknown', adapter.status === 'Up' ? 'good' : ''), ...(adapter.isDefault ? [badge('Default route', 'blue')] : []))), el('div', {class: 'adapter-rates'}, el('div', {}, el('span', {}, 'Download'), el('strong', {class: 'download-text'}, bytes(adapter.downloadBps, true))), el('div', {}, el('span', {}, 'Upload'), el('strong', {class: 'upload-text'}, bytes(adapter.uploadBps, true)))), details([['Type', adapter.type], ['IP addresses', list(adapter.ipAddresses).join('\n')], ['Gateway', adapter.gateway], ['MAC address', adapter.mac], ['Link speed', linkSpeed(adapter.speed)], ...(adapter.type === 'Wi-Fi' || adapter.ssid ? [['Wi-Fi network', adapter.ssid], ['Signal', adapter.signal], ['Receive link', adapter.linkReceiveMbps ? adapter.linkReceiveMbps + ' Mbps' : null], ['Transmit link', adapter.linkTransmitMbps ? adapter.linkTransmitMbps + ' Mbps' : null]] : []), ['Adapter received', bytes(adapter.receivedBytes)], ['Adapter sent', bytes(adapter.sentBytes)]]))) : pending('network adapters'));
+  put('adapter-list', adapters.length ? adapters.map(adapter => el('section', { class: 'panel' }, el('div', { class: 'panel-heading adapter-heading' }, el('div', { class: 'adapter-title' }, el('span', { class: 'connection-icon' }, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, adapter.name), el('p', {}, adapter.description || adapter.type))), el('div', { class: 'adapter-badges' }, badge(adapter.status || 'Unknown', adapter.status === 'Up' ? 'good' : ''), ...(adapter.isDefault ? [badge('Default route', 'blue')] : []))), el('div', { class: 'adapter-rates' }, el('div', {}, el('span', {}, 'Download'), el('strong', { class: 'download-text' }, bytes(adapter.downloadBps, true))), el('div', {}, el('span', {}, 'Upload'), el('strong', { class: 'upload-text' }, bytes(adapter.uploadBps, true)))), details([['Type', adapter.type], ['IP addresses', list(adapter.ipAddresses).join('\n')], ['Gateway', adapter.gateway], ['MAC address', adapter.mac], ['Link speed', linkSpeed(adapter.speed)], ...(adapter.type === 'Wi-Fi' || adapter.ssid ? [['Wi-Fi network', adapter.ssid], ['Signal', adapter.signal], ['Receive link', adapter.linkReceiveMbps ? adapter.linkReceiveMbps + ' Mbps' : null], ['Transmit link', adapter.linkTransmitMbps ? adapter.linkTransmitMbps + ' Mbps' : null]] : []), ['Adapter received', bytes(adapter.receivedBytes)], ['Adapter sent', bytes(adapter.sentBytes)]]))) : pending('network adapters'));
 }
 function renderDiagnostics() {
   const q = state?.diagnostics?.networkQuality;
@@ -518,7 +518,7 @@ function renderDiagnostics() {
   }
   const alerts = list(state?.alerts);
   if (!alerts.length) {
-    put('alerts-table', el('div', {style: 'padding: 24px; text-align: center; color: var(--muted); font-size: 13px;'}, 'No active alerts. Network health and telemetry are normal.'));
+    put('alerts-table', el('div', { style: 'padding: 24px; text-align: center; color: var(--muted); font-size: 13px;' }, 'No active alerts. Network health and telemetry are normal.'));
   } else {
     put('alerts-table', table(['Time', 'Level', 'Event', 'Details'], alerts.map(a => el('tr', {},
       cell(time(a.time), 'small'),
@@ -541,14 +541,14 @@ function renderPingChart(historyPoints) {
   const netPath = historyPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + scaleX(i).toFixed(1) + ' ' + scaleY(p.internetMs).toFixed(1)).join(' ');
   const gwPath = historyPoints.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + scaleX(i).toFixed(1) + ' ' + scaleY(p.gatewayMs).toFixed(1)).join(' ');
 
-  const chartSvg = svg('svg', {viewBox: `0 0 ${width} ${height}`, style: `width: 100%; height: ${height}px; display: block;`},
-    svg('line', {x1: left, y1: top, x2: right, y2: top, stroke: 'var(--line)', 'stroke-dasharray': '2 2'}),
-    svg('line', {x1: left, y1: (top + bottom) / 2, x2: right, y2: (top + bottom) / 2, stroke: 'var(--line)', 'stroke-dasharray': '2 2'}),
-    svg('line', {x1: left, y1: bottom, x2: right, y2: bottom, stroke: 'var(--line)'}),
-    svg('text', {x: 6, y: top + 4, fill: 'var(--muted)', 'font-size': '10'}, Math.round(maxVal) + 'ms'),
-    svg('text', {x: 6, y: bottom - 2, fill: 'var(--muted)', 'font-size': '10'}, '0ms'),
-    svg('path', {d: netPath, fill: 'none', stroke: 'var(--blue)', 'stroke-width': '2'}),
-    svg('path', {d: gwPath, fill: 'none', stroke: 'var(--teal)', 'stroke-width': '2'})
+  const chartSvg = svg('svg', { viewBox: `0 0 ${width} ${height}`, style: `width: 100%; height: ${height}px; display: block;` },
+    svg('line', { x1: left, y1: top, x2: right, y2: top, stroke: 'var(--line)', 'stroke-dasharray': '2 2' }),
+    svg('line', { x1: left, y1: (top + bottom) / 2, x2: right, y2: (top + bottom) / 2, stroke: 'var(--line)', 'stroke-dasharray': '2 2' }),
+    svg('line', { x1: left, y1: bottom, x2: right, y2: bottom, stroke: 'var(--line)' }),
+    svg('text', { x: 6, y: top + 4, fill: 'var(--muted)', 'font-size': '10' }, Math.round(maxVal) + 'ms'),
+    svg('text', { x: 6, y: bottom - 2, fill: 'var(--muted)', 'font-size': '10' }, '0ms'),
+    svg('path', { d: netPath, fill: 'none', stroke: 'var(--blue)', 'stroke-width': '2' }),
+    svg('path', { d: gwPath, fill: 'none', stroke: 'var(--teal)', 'stroke-width': '2' })
   );
   put('diag-ping-chart', chartSvg);
 }
@@ -567,9 +567,9 @@ function renderRouter() {
     put('router-devices', empty('Router is not connected', 'Connect above to read the router’s device list. Per-device traffic totals are not available.', 'network'));
     return;
   }
-  put('router-details', el('div', {class: 'panel-heading'}, el('div', {}, el('h2', {}, router.model || 'Your router'), el('p', {}, 'Whole-network monthly usage'))), el('div', {class: 'router-stats'}, el('div', {}, el('span', {}, 'Downloaded'), el('strong', {class: 'download-text'}, Number.isFinite(router.monthlyDownloadMb) ? bytes(router.monthlyDownloadMb * 1e6) : '—')), el('div', {}, el('span', {}, 'Uploaded'), el('strong', {class: 'upload-text'}, Number.isFinite(router.monthlyUploadMb) ? bytes(router.monthlyUploadMb * 1e6) : '—'))), details([['Firmware', router.firmware], ['Network type', router.networkType], ['Temperature', router.temperature], ['Last updated', router.updatedAt ? time(router.updatedAt) : null]]));
+  put('router-details', el('div', { class: 'panel-heading' }, el('div', {}, el('h2', {}, router.model || 'Your router'), el('p', {}, 'Whole-network monthly usage'))), el('div', { class: 'router-stats' }, el('div', {}, el('span', {}, 'Downloaded'), el('strong', { class: 'download-text' }, Number.isFinite(router.monthlyDownloadMb) ? bytes(router.monthlyDownloadMb * 1e6) : '—')), el('div', {}, el('span', {}, 'Uploaded'), el('strong', { class: 'upload-text' }, Number.isFinite(router.monthlyUploadMb) ? bytes(router.monthlyUploadMb * 1e6) : '—'))), details([['Firmware', router.firmware], ['Network type', router.networkType], ['Temperature', router.temperature], ['Last updated', router.updatedAt ? time(router.updatedAt) : null]]));
   const devices = list(router.devices);
-  put('router-devices', devices.length ? table(['Device', 'IP address', 'MAC address', 'Type', 'Signal', 'Transmit link', 'Receive link'], devices.map(device => el('tr', {}, cell(el('span', {class: 'app-name'}, device.name || 'Unnamed device'), ''), cell(device.ip || '—', 'number endpoint'), cell(device.mac || '—', 'number endpoint'), cell(device.type || '—'), cell(device.signal || '—'), cell(device.txRate || '—'), cell(device.rxRate || '—')))) : empty('No devices reported', 'The router has not returned a device list. No per-device usage is inferred.', 'network'));
+  put('router-devices', devices.length ? table(['Device', 'IP address', 'MAC address', 'Type', 'Signal', 'Transmit link', 'Receive link'], devices.map(device => el('tr', {}, cell(el('span', { class: 'app-name' }, device.name || 'Unnamed device'), ''), cell(device.ip || '—', 'number endpoint'), cell(device.mac || '—', 'number endpoint'), cell(device.type || '—'), cell(device.signal || '—'), cell(device.txRate || '—'), cell(device.rxRate || '—')))) : empty('No devices reported', 'The router has not returned a device list. No per-device usage is inferred.', 'network'));
 }
 function renderSettings() {
   const collector = state?.collector;
@@ -578,7 +578,7 @@ function renderSettings() {
 
 function focusApp(id) {
   const button = [...document.querySelectorAll('#page-' + page + ' [data-app-id]')].find(node => node.dataset.appId === id);
-  button?.focus({preventScroll: true});
+  button?.focus({ preventScroll: true });
 }
 function notify(value) {
   text('toast', value); $('toast').hidden = false;
@@ -646,10 +646,10 @@ $('history-refresh').addEventListener('click', loadHistory);
 $('export-history').addEventListener('click', async () => {
   const button = $('export-history'); button.disabled = true;
   try {
-    const response = await fetch('/api/export?' + historyQuery(), {cache: 'no-store', headers: pairingHeaders(), signal: AbortSignal.timeout(20000)});
+    const response = await fetch('/api/export?' + historyQuery(), { cache: 'no-store', headers: pairingHeaders(), signal: AbortSignal.timeout(20000) });
     if (!response.ok) throw new Error('CSV export failed (' + response.status + '). Try again.');
     const url = URL.createObjectURL(await response.blob());
-    const link = el('a', {href: url, download: 'flow-usage-' + historyRange + '-' + new Date().toISOString().slice(0, 10) + '.csv'});
+    const link = el('a', { href: url, download: 'flow-usage-' + historyRange + '-' + new Date().toISOString().slice(0, 10) + '.csv' });
     document.body.append(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     notify('Usage CSV exported.');
@@ -659,10 +659,10 @@ $('export-history').addEventListener('click', async () => {
 $('export-json')?.addEventListener('click', async () => {
   const button = $('export-json'); button.disabled = true;
   try {
-    const response = await fetch('/api/export?' + historyQuery() + '&format=json', {cache: 'no-store', headers: pairingHeaders(), signal: AbortSignal.timeout(20000)});
+    const response = await fetch('/api/export?' + historyQuery() + '&format=json', { cache: 'no-store', headers: pairingHeaders(), signal: AbortSignal.timeout(20000) });
     if (!response.ok) throw new Error('JSON export failed (' + response.status + '). Try again.');
     const url = URL.createObjectURL(await response.blob());
-    const link = el('a', {href: url, download: 'flow-usage-' + historyRange + '-' + new Date().toISOString().slice(0, 10) + '.json'});
+    const link = el('a', { href: url, download: 'flow-usage-' + historyRange + '-' + new Date().toISOString().slice(0, 10) + '.json' });
     document.body.append(link); link.click(); link.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     notify('Usage JSON exported.');
@@ -676,10 +676,10 @@ $('budget-form').addEventListener('submit', async event => {
   if (!Number.isFinite(budgetGb) || budgetGb < 0 || budgetGb > 100000 || !$('budget-form').reportValidity()) { message('budget-message', 'Enter a budget from 0 to 100,000 GB.', 'error'); return; }
   $('budget-save').disabled = true; message('budget-message', 'Saving budget…');
   try {
-    const result = await api('/api/settings', {method: 'POST', body: JSON.stringify({budgetGb})});
+    const result = await api('/api/settings', { method: 'POST', body: JSON.stringify({ budgetGb }) });
     if (result.success === false) throw new Error(result.message || 'The budget could not be saved.');
-    if (state) state.settings = {...state.settings, budgetGb};
-    if (latest) latest.settings = {...latest.settings, budgetGb};
+    if (state) state.settings = { ...state.settings, budgetGb };
+    if (latest) latest.settings = { ...latest.settings, budgetGb };
     budgetDirty = false; message('budget-message', 'Budget saved on this laptop.', 'success');
   } catch (error) { message('budget-message', error.message, 'error'); }
   finally { $('budget-save').disabled = false; }
@@ -690,7 +690,7 @@ $('router-form').addEventListener('submit', async event => {
   routerBusy = true; $('router-connect').disabled = true;
   $('router-message').dataset.action = 'true'; message('router-message', 'Connecting to 192.168.8.1…');
   try {
-    const result = await api('/api/router/connect', {method: 'POST', signal: AbortSignal.timeout(60000), body: JSON.stringify({username: $('router-username').value.trim(), password: $('router-password').value})});
+    const result = await api('/api/router/connect', { method: 'POST', signal: AbortSignal.timeout(60000), body: JSON.stringify({ username: $('router-username').value.trim(), password: $('router-password').value }) });
     if (!result.success) throw new Error(result.message || 'Router connection failed.');
     message('router-message', result.message || 'Router connected.', 'success');
     poll();
@@ -701,7 +701,7 @@ $('router-disconnect').addEventListener('click', async () => {
   if (routerBusy) return;
   routerBusy = true; $('router-disconnect').disabled = true; $('router-message').dataset.action = 'true';
   try {
-    const result = await api('/api/router/disconnect', {method: 'POST', body: '{}'});
+    const result = await api('/api/router/disconnect', { method: 'POST', body: '{}' });
     if (!result.success) throw new Error(result.message || 'Router disconnect failed.');
     message('router-message', result.message || 'Router disconnected.', 'success');
     $('router-password').value = ''; poll();
@@ -712,7 +712,7 @@ $('stop-monitor').addEventListener('click', async () => {
   if (!window.confirm('Stop the monitor? Traffic collection and history will stop. Restart using Start Monitor.cmd.')) return;
   $('stop-monitor').disabled = true;
   try {
-    const result = await api('/api/stop', {method: 'POST', body: '{}'});
+    const result = await api('/api/stop', { method: 'POST', body: '{}' });
     if (!result.success) throw new Error(result.message || 'The monitor could not be stopped.');
     stopped = true; clearTimeout(pollTimer); historyRequest++;
     message('stop-message', 'Monitor stopped. Restart using Start Monitor.cmd.', 'success');
@@ -739,7 +739,7 @@ $('run-speedtest')?.addEventListener('click', async () => {
   text('speedtest-val', '…');
   text('speedtest-msg', '');
   try {
-    const res = await api('/api/diagnostics/speedtest', {method: 'POST', body: '{}'});
+    const res = await api('/api/diagnostics/speedtest', { method: 'POST', body: '{}' });
     if (res.success) {
       text('speedtest-val', res.downloadMbps);
       text('speedtest-sub', 'Ping: ' + res.pingMs + 'ms · Duration: ' + res.durationSeconds + 's · Server: ' + res.server);
@@ -788,22 +788,22 @@ $('dns-form')?.addEventListener('submit', async (e) => {
   dnsRunning = true;
   const btn = $('dns-form').querySelector('button[type=submit]');
   btn.disabled = true;
-  put('dns-results', el('p', {class: 'field-hint'}, 'Benchmarking DNS servers for ' + domain + '…'));
+  put('dns-results', el('p', { class: 'field-hint' }, 'Benchmarking DNS servers for ' + domain + '…'));
   try {
     const res = await api('/api/diagnostics/dns?name=' + encodeURIComponent(domain));
     const cards = list(res.tests).map(t => {
       const timeClass = !t.success ? 'fail' : t.elapsedMs < 30 ? 'fast' : t.elapsedMs < 100 ? 'normal' : 'slow';
-      return el('div', {class: 'dns-card'},
+      return el('div', { class: 'dns-card' },
         el('div', {},
-          el('div', {class: 'dns-card-name'}, t.server),
-          el('div', {class: 'dns-card-ips'}, t.success ? (list(t.addresses).join(', ') || 'Resolved') : t.error)
+          el('div', { class: 'dns-card-name' }, t.server),
+          el('div', { class: 'dns-card-ips' }, t.success ? (list(t.addresses).join(', ') || 'Resolved') : t.error)
         ),
-        el('div', {class: 'dns-card-time ' + timeClass}, t.success ? t.elapsedMs + ' ms' : 'Failed')
+        el('div', { class: 'dns-card-time ' + timeClass }, t.success ? t.elapsedMs + ' ms' : 'Failed')
       );
     });
     put('dns-results', ...cards);
   } catch (err) {
-    put('dns-results', el('p', {class: 'form-message error'}, err.message));
+    put('dns-results', el('p', { class: 'form-message error' }, err.message));
   } finally {
     dnsRunning = false;
     btn.disabled = false;
