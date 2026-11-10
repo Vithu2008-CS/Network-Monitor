@@ -105,6 +105,7 @@ app.MapPost("/api/diagnostics/speedtest", async (NetworkDiagnostics diag, Cancel
     return Results.Ok(await diag.SpeedTestAsync(token));
 });
 app.MapGet("/api/diagnostics/alerts", (NetworkDiagnostics diag) => diag.RecentAlerts());
+app.MapPost("/api/diagnostics/alerts/clear", (NetworkDiagnostics diag) => { diag.ClearAlerts(); return Results.Ok(new { success = true }); });
 app.MapPost("/api/settings", (Settings settings, TrafficStore store) =>
 {
     try { store.SetSettings(settings); return Results.Ok(new { success = true, message = "Budget saved." }); }

@@ -34,6 +34,8 @@ public static class SelfTest
         Check(diag.Quality is not null, "diagnostics quality initialization");
         diag.AddAlert("info", "Test Alert", "Testing alert system");
         Check(diag.RecentAlerts().Length >= 1, "alert recording");
+        diag.ClearAlerts();
+        Check(diag.RecentAlerts().Length == 0, "alert clearing");
         var policy = new AccessPolicy(IPAddress.Parse("192.168.8.138"));
         var localRequest = new DefaultHttpContext();
         localRequest.Connection.RemoteIpAddress = IPAddress.Loopback;

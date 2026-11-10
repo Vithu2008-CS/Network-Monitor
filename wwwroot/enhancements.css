@@ -330,47 +330,98 @@ tbody tr:hover { background: var(--hover); }
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
 
-/* Network Quality & Latency Card */
-.quality-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
-.quality-stat { background: var(--surface-alt); padding: 10px 12px; border-radius: 8px; border: 1px solid var(--line); }
-.quality-stat-label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; }
-.quality-stat-val { font-size: 17px; font-weight: 600; color: var(--ink); }
-.quality-stat-val small { font-size: 11px; font-weight: normal; color: var(--muted); margin-left: 2px; }
+/* Network Quality & Latency Card on Overview */
+.quality-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0 10px; }
+.quality-stat { background: var(--surface-alt); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--line); }
+.quality-stat-label { font-size: 11px; font-weight: 550; color: var(--muted); display: block; margin-bottom: 4px; }
+.quality-stat-val { font-size: 20px; font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; }
+.quality-stat-val small { font-size: 12px; font-weight: normal; color: var(--muted); margin-left: 3px; }
+.quality-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 
-/* Diagnostics page grid */
-.diagnostics-grid, .diagnostics-tools-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr); gap: 22px; margin-bottom: 24px; }
-.diag-metrics { grid-template-columns: repeat(4, 1fr); margin: 18px 23px; gap: 12px; }
-.diag-chart { height: 180px; padding: 10px 23px; }
-.speedtest-box { text-align: center; padding: 24px 16px; background: var(--surface-alt); border-radius: 12px; border: 1px solid var(--line); margin-bottom: 16px; }
-.speedtest-number { font-size: 48px; font-weight: 700; color: var(--blue); letter-spacing: -1px; line-height: 1; }
-.speedtest-unit { font-size: 18px; font-weight: 600; color: var(--muted); margin-left: 6px; }
-.speedtest-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+/* Diagnostics Page Grid & Symmetry */
+.diagnostics-grid, .diagnostics-tools-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 24px; align-items: stretch; }
+.diagnostics-grid > .panel, .diagnostics-tools-grid > .panel { display: flex; flex-direction: column; min-width: 0; }
+.diagnostics-grid > .panel > .form-body, .diagnostics-tools-grid > .panel > .form-body { flex: 1; display: flex; flex-direction: column; }
 
-/* Inputs with inline action */
-.input-with-action { display: flex; gap: 8px; margin-top: 8px; margin-bottom: 12px; }
-.input-with-action input { flex: 1; border: 1px solid var(--border-control); border-radius: 7px; padding: 10px 12px; min-height: 41px; background: var(--surface); color: var(--ink); }
+/* Diagnostic Metric KPI Tiles */
+.diag-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px 20px; margin: 0; }
+.diag-tile { background: var(--surface-alt); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.diag-tile-label { font-size: 11px; font-weight: 550; color: var(--muted); margin-bottom: 4px; }
+.diag-tile-value { font-size: 19px; font-weight: 650; color: var(--ink); font-variant-numeric: tabular-nums; }
+.diag-tile-note { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
-/* Diagnostic Console Output */
-.diag-console { background: #0f172a; color: #38bdf8; font-family: monospace; font-size: 12px; line-height: 1.6; padding: 14px; border-radius: 8px; overflow-x: auto; max-height: 220px; white-space: pre-wrap; margin-top: 14px; }
-:root[data-theme="dark"] .diag-console { background: #070d18; color: #7dd3fc; border: 1px solid #1e293b; }
+/* Ping Chart */
+.diag-chart { height: 165px; padding: 8px 20px 14px; }
+
+/* Speed Test Panel */
+.speedtest-panel .panel-heading { padding-bottom: 12px; }
+.speedtest-form { padding: 20px; justify-content: space-between; gap: 16px; }
+.speedtest-box { text-align: center; padding: 24px 18px; background: var(--surface-alt); border-radius: 10px; border: 1px solid var(--line); position: relative; overflow: hidden; }
+.speedtest-display { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+.speedtest-number { font-size: 46px; font-weight: 750; color: var(--blue); letter-spacing: -1.5px; line-height: 1; font-variant-numeric: tabular-nums; }
+.speedtest-unit { font-size: 16px; font-weight: 600; color: var(--muted); }
+.speedtest-sub { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.4; }
+.speedtest-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin-top: 12px; font-size: 12px; color: var(--ink); }
+.speedtest-meta span { display: inline-flex; align-items: center; gap: 4px; }
+.speedtest-meta strong { font-weight: 600; }
+.speedtest-btn { width: 100%; min-height: 42px; font-size: 14px; }
+
+.speedtest-progress { width: 100%; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; margin-top: 14px; }
+.speedtest-bar { display: block; height: 100%; width: 40%; background: var(--blue); border-radius: 2px; animation: speedtest-slide 1.4s infinite ease-in-out; }
+@keyframes speedtest-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* Tool Forms, Quick Chips & Action Input */
+.tool-panel .panel-heading { padding-bottom: 12px; }
+.tool-form { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.input-with-action { display: flex; gap: 8px; margin-top: 6px; margin-bottom: 10px; }
+.input-with-action input { flex: 1; border: 1px solid var(--border-control); border-radius: 7px; padding: 9px 12px; min-height: 40px; background: var(--surface); color: var(--ink); font-size: 13px; }
+.quick-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { font-size: 11px; font-weight: 550; padding: 4px 9px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface-alt); color: var(--muted); cursor: pointer; transition: background .15s, border-color .15s, color .15s; }
+.chip:hover { border-color: var(--blue); color: var(--blue); background: var(--selected); }
+
+/* Diagnostic Console Terminal */
+.diag-console-wrap { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; margin-top: auto; }
+.console-header { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 6px 12px; border-bottom: 1px solid #1e293b; color: #94a3b8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.console-header button { min-height: 26px; padding: 2px 8px; font-size: 11px; background: #1e293b; color: #f1f5f9; border: 1px solid #334155; border-radius: 4px; }
+.console-header button:hover { background: #334155; }
+.diag-console { background: #0b1120; color: #38bdf8; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size: 12px; line-height: 1.55; padding: 12px 14px; margin: 0; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+:root[data-theme="dark"] .console-header { background: #070d18; border-color: #1a2333; }
+:root[data-theme="dark"] .diag-console { background: #040810; color: #7dd3fc; }
 
 /* DNS Results */
-.dns-results { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; }
-.dns-card { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; background: var(--surface-alt); border: 1px solid var(--line); font-size: 12px; }
+.dns-results { margin-top: auto; display: flex; flex-direction: column; gap: 8px; min-height: 140px; }
+.dns-card { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; background: var(--surface-alt); border: 1px solid var(--line); font-size: 12px; transition: border-color .15s; }
+.dns-card:hover { border-color: var(--border-control); }
 .dns-card-name { font-weight: 600; color: var(--ink); }
 .dns-card-ips { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.dns-card-time { font-size: 14px; font-weight: 600; }
-.dns-card-time.fast { color: var(--success); }
-.dns-card-time.slow { color: var(--warning); }
-.dns-card-time.fail { color: var(--danger); }
+.dns-card-time { font-size: 13px; font-weight: 650; font-variant-numeric: tabular-nums; padding: 3px 8px; border-radius: 5px; }
+.dns-card-time.fast { color: var(--success); background: var(--success-bg); }
+.dns-card-time.normal { color: var(--blue); background: var(--selected); }
+.dns-card-time.slow { color: var(--warning); background: var(--warning-bg); }
+.dns-card-time.fail { color: var(--danger); background: var(--danger-bg); }
 
-/* Endpoint host and service enhancements in Connections table */
-.endpoint-addr { display: block; font-family: monospace; font-size: 12px; }
-.endpoint-host { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
-.badge-subtle { display: inline-block; padding: 2px 6px; font-size: 10px; font-weight: 600; border-radius: 4px; background: var(--selected); color: var(--blue); margin-right: 4px; }
+/* Alerts Heading & Table */
+.alerts-heading { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; margin-bottom: 14px; }
+.alerts-heading .button { min-height: 32px; padding: 4px 10px; font-size: 12px; }
 
-/* Mobile diagnostics layout */
-@media (max-width: 980px) {
+/* Endpoint Host & Service in Connections Table */
+.endpoint-cell { display: flex; flex-direction: column; gap: 2px; }
+.endpoint-addr { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color: var(--ink); }
+.endpoint-host { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: var(--muted); max-width: 260px; }
+.endpoint-host .host-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge-subtle { display: inline-block; padding: 1px 5px; font-size: 10px; font-weight: 650; border-radius: 4px; background: var(--selected); color: var(--blue); letter-spacing: .02em; flex-shrink: 0; }
+
+/* Responsive adjustments */
+@media (max-width: 1080px) {
   .diagnostics-grid, .diagnostics-tools-grid { grid-template-columns: 1fr; }
   .diag-metrics { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .diag-metrics { grid-template-columns: 1fr; padding: 12px 16px; }
+  .quality-stat-row { grid-template-columns: 1fr; }
+  .speedtest-number { font-size: 38px; }
+  .endpoint-host { max-width: 180px; }
 }

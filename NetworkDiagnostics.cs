@@ -69,6 +69,10 @@ public sealed class NetworkDiagnostics : BackgroundService
     private double? currentJitterMs;
     private string gatewayIp = "";
     private string quality = "Starting";
+    private int degradedStreak = 0;
+    private int healthyStreak = 0;
+    private string lastAnnouncedState = "Normal";
+    private DateTimeOffset lastAlertTime = DateTimeOffset.MinValue;
     private readonly HttpClient http;
 
     public NetworkDiagnostics()
@@ -119,6 +123,14 @@ public sealed class NetworkDiagnostics : BackgroundService
             var id = Guid.NewGuid().ToString("N")[..8];
             alerts.Add(new NetworkAlert(id, DateTimeOffset.Now, level, title, detail));
             while (alerts.Count > 50) alerts.RemoveAt(0);
+        }
+    }
+
+    public void ClearAlerts()
+    {
+        lock (gate)
+        {
+            alerts.Clear();
         }
     }
 
@@ -214,27 +226,54 @@ public sealed class NetworkDiagnostics : BackgroundService
                 while (internetPings.Count > 25) internetPings.RemoveAt(0);
 
                 var loss = (double)internetPings.Count(p => !p) / internetPings.Count * 100;
-                var prevQuality = quality;
 
-                if (string.IsNullOrEmpty(gw) || (internetPings.Count >= 5 && loss >= 90))
-                    quality = "Offline";
-                else if (loss >= 15 || (netMs.HasValue && netMs.Value > 250))
-                    quality = "Degraded";
-                else if (loss > 0 || (netMs.HasValue && netMs.Value > 100))
-                    quality = "Fair";
-                else if (netMs.HasValue && netMs.Value <= 50 && (!currentJitterMs.HasValue || currentJitterMs.Value <= 15))
-                    quality = "Optimal";
-                else
-                    quality = "Good";
+                var isCurrentlyOffline = string.IsNullOrEmpty(gw) || (internetPings.Count >= 5 && loss >= 90);
+                var isCurrentlyDegraded = !isCurrentlyOffline && (loss >= 20 || (netMs.HasValue && netMs.Value > 250));
 
-                if (prevQuality != "Starting" && prevQuality != quality)
+                if (isCurrentlyOffline)
                 {
-                    if (quality == "Offline")
+                    quality = "Offline";
+                    degradedStreak = 0;
+                    healthyStreak = 0;
+                    if (lastAnnouncedState != "Offline" && (DateTimeOffset.Now - lastAlertTime).TotalSeconds >= 15)
+                    {
                         AddAlertInternal("error", "Internet Disconnected", "Internet gateway or DNS is unreachable.");
-                    else if (quality == "Degraded")
-                        AddAlertInternal("warning", "Connection Degraded", $"High latency ({netMs} ms) or packet loss detected.");
-                    else if (prevQuality is "Offline" or "Degraded" && quality is "Optimal" or "Good")
-                        AddAlertInternal("info", "Connection Restored", $"Network health returned to {quality} ({netMs} ms).");
+                        lastAnnouncedState = "Offline";
+                        lastAlertTime = DateTimeOffset.Now;
+                    }
+                }
+                else if (isCurrentlyDegraded)
+                {
+                    quality = "Degraded";
+                    healthyStreak = 0;
+                    degradedStreak++;
+                    if (degradedStreak >= 3 && lastAnnouncedState != "Degraded" && (DateTimeOffset.Now - lastAlertTime).TotalSeconds >= 45)
+                    {
+                        AddAlertInternal("warning", "Connection Degraded", $"High latency ({Math.Round(netMs ?? 0)} ms) or packet loss ({loss:F0}%) sustained.");
+                        lastAnnouncedState = "Degraded";
+                        lastAlertTime = DateTimeOffset.Now;
+                    }
+                }
+                else if (loss > 0 || (netMs.HasValue && netMs.Value > 100))
+                {
+                    quality = "Fair";
+                    if (degradedStreak > 0) degradedStreak--;
+                    healthyStreak = 0;
+                }
+                else
+                {
+                    quality = (netMs.HasValue && netMs.Value <= 50 && (!currentJitterMs.HasValue || currentJitterMs.Value <= 15))
+                        ? "Optimal"
+                        : "Good";
+                    degradedStreak = 0;
+                    healthyStreak++;
+
+                    if (healthyStreak >= 2 && lastAnnouncedState is "Offline" or "Degraded")
+                    {
+                        AddAlertInternal("info", "Connection Restored", $"Network health returned to {quality} ({Math.Round(netMs ?? 0)} ms).");
+                        lastAnnouncedState = "Normal";
+                        lastAlertTime = DateTimeOffset.Now;
+                    }
                 }
 
                 history.Enqueue(new PingPoint(DateTimeOffset.Now, gwMs, netMs));

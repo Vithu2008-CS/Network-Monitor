@@ -111,56 +111,72 @@
       <section id="page-network" class="page" aria-label="Network adapters" hidden><div id="network-summary" class="subheading"></div><div id="adapter-list" class="adapter-grid"></div><p class="page-note">Adapter counters are reported by Windows and may span a different period than this monitor session. Virtual adapters can overlap physical traffic.</p></section>
 
       <section id="page-diagnostics" class="page" aria-label="Diagnostics" hidden>
-        <div class="notice notice-info"><svg class="icon"><use href="#i-activity"/></svg><div><strong>Live Network Health &amp; Diagnostics</strong><p>Measure real-time latency, jitter, packet loss, DNS resolution times, and test bandwidth speed.</p></div></div>
         <div class="diagnostics-grid">
           <section class="panel">
             <div class="panel-heading"><div><h2>Connection quality &amp; latency</h2><p>Continuous ping telemetry</p></div><span id="diag-quality-badge" class="badge">Checking</span></div>
-            <div class="metrics diag-metrics" id="diag-metrics"></div>
+            <div class="diag-metrics" id="diag-metrics"></div>
             <div class="chart-key"><span><i class="key-dot download"></i>Internet ping (1.1.1.1)</span><span><i class="key-dot upload"></i>Gateway ping</span></div>
             <div id="diag-ping-chart" class="diag-chart"></div>
             <div class="panel-foot"><span id="diag-gateway-ip">Gateway: Detecting</span><span>Tests every 3 seconds</span></div>
           </section>
 
-          <section class="panel">
-            <div class="panel-heading"><div><h2>Bandwidth speed test</h2><p>Measure real download throughput and ping</p></div></div>
-            <div class="form-body">
+          <section class="panel speedtest-panel">
+            <div class="panel-heading"><div><h2>Bandwidth speed test</h2><p>Measure real download throughput and ping</p></div><span id="speedtest-badge" class="badge">Ready</span></div>
+            <div class="form-body speedtest-form">
               <div class="speedtest-box">
                 <div class="speedtest-display"><span class="speedtest-number" id="speedtest-val">—</span><span class="speedtest-unit" id="speedtest-unit">Mbps</span></div>
                 <div class="speedtest-sub" id="speedtest-sub">Press run to measure throughput</div>
+                <div id="speedtest-progress" class="speedtest-progress" hidden><span class="speedtest-bar"></span></div>
               </div>
-              <button id="run-speedtest" class="button button-primary" type="button">Run speed test</button>
+              <button id="run-speedtest" class="button button-primary speedtest-btn" type="button">Run speed test</button>
               <p id="speedtest-msg" class="field-hint"></p>
             </div>
           </section>
         </div>
 
         <div class="diagnostics-tools-grid">
-          <section class="panel">
+          <section class="panel tool-panel">
             <div class="panel-heading"><div><h2>Ping diagnostic tool</h2><p>Test reachability and round-trip time</p></div></div>
-            <form id="ping-form" class="form-body">
+            <form id="ping-form" class="form-body tool-form">
               <label for="ping-host">Target host or IP</label>
               <div class="input-with-action">
                 <input id="ping-host" type="text" placeholder="e.g. google.com, 1.1.1.1, or router IP" required autocomplete="off">
                 <button class="button button-primary" type="submit">Ping</button>
               </div>
-              <pre id="ping-output" class="diag-console" hidden></pre>
+              <div class="quick-chips">
+                <button type="button" class="chip" data-ping="1.1.1.1">1.1.1.1</button>
+                <button type="button" class="chip" data-ping="8.8.8.8">8.8.8.8</button>
+                <button type="button" class="chip" data-ping="google.com">google.com</button>
+              </div>
+              <div id="ping-console-wrap" class="diag-console-wrap" hidden>
+                <div class="console-header"><span>Output</span><button id="copy-ping-output" class="button button-small" type="button">Copy</button></div>
+                <pre id="ping-output" class="diag-console"></pre>
+              </div>
             </form>
           </section>
 
-          <section class="panel">
+          <section class="panel tool-panel">
             <div class="panel-heading"><div><h2>DNS benchmark test</h2><p>Compare resolution response times</p></div></div>
-            <form id="dns-form" class="form-body">
+            <form id="dns-form" class="form-body tool-form">
               <label for="dns-domain">Domain to resolve</label>
               <div class="input-with-action">
                 <input id="dns-domain" type="text" value="google.com" required autocomplete="off">
                 <button class="button button-primary" type="submit">Benchmark DNS</button>
+              </div>
+              <div class="quick-chips">
+                <button type="button" class="chip" data-dns="google.com">google.com</button>
+                <button type="button" class="chip" data-dns="cloudflare.com">cloudflare.com</button>
+                <button type="button" class="chip" data-dns="github.com">github.com</button>
               </div>
               <div id="dns-results" class="dns-results"></div>
             </form>
           </section>
         </div>
 
-        <div class="section-heading"><div><h2>Network events &amp; alerts</h2><p>Automatic detection of connectivity drops, spikes, and state transitions</p></div></div>
+        <div class="section-heading alerts-heading">
+          <div><h2>Network events &amp; alerts <span id="alerts-count" class="count-label"></span></h2><p>Automatic detection of connectivity drops, spikes, and state transitions</p></div>
+          <button id="clear-alerts" class="button button-small" type="button">Clear alerts</button>
+        </div>
         <section class="panel table-panel"><div id="alerts-table"></div></section>
       </section>
 

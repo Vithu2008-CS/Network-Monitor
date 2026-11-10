@@ -248,21 +248,28 @@ function renderOverview() {
     put('quality-card', el('div', { class: 'aside-body' },
       el('div', { class: 'aside-top' },
         el('span', { class: 'connection-icon' }, icon('activity')),
-        el('div', {}, el('h2', {}, 'Connection quality'), el('p', {}, 'Real-time latency')),
+        el('div', {}, el('h2', {}, 'Connection quality'), el('p', {}, 'Real-time telemetry')),
         badge(q.quality, qBadgeClass)
       ),
       el('div', { class: 'quality-stat-row' },
         el('div', { class: 'quality-stat' },
           el('span', { class: 'quality-stat-label' }, 'Internet ping'),
-          el('span', { class: 'quality-stat-val' }, q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) : '—', el('small', {}, 'ms'))
+          el('div', { class: 'quality-stat-val download-text' }, q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) : '—', el('small', {}, 'ms'))
         ),
         el('div', { class: 'quality-stat' },
           el('span', { class: 'quality-stat-label' }, 'Gateway ping'),
-          el('span', { class: 'quality-stat-val' }, q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) : '—', el('small', {}, 'ms'))
+          el('div', { class: 'quality-stat-val upload-text' }, q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) : '—', el('small', {}, 'ms'))
         )
       ),
-      el('p', { class: 'budget-caption' }, 'Jitter: ' + (q.jitterMs ? q.jitterMs + 'ms' : '0ms') + ' · Loss: ' + q.packetLossPercent + '%'),
-      el('a', { href: '#diagnostics', class: 'text-link', style: 'margin-top: 8px; display: inline-block;' }, 'Run diagnostics →')
+      el('dl', { class: 'mini-dl' },
+        el('dt', {}, 'Jitter'), el('dd', {}, (q.jitterMs ? q.jitterMs + ' ms' : '0 ms')),
+        el('dt', {}, 'Packet loss'), el('dd', {}, q.packetLossPercent + '%'),
+        el('dt', {}, 'Gateway'), el('dd', {}, q.gatewayAddress || 'Not detected')
+      ),
+      el('div', { class: 'quality-foot' },
+        el('span', { class: 'small muted' }, 'Tested every 3s'),
+        el('a', { href: '#diagnostics', class: 'text-link' }, 'Open diagnostics →')
+      )
     ));
   } else {
     put('quality-card', el('div', { class: 'aside-body' }, el('h2', {}, 'Connection quality'), el('p', { class: 'aside-sub' }, 'Measuring latency…')));
@@ -350,11 +357,11 @@ function connectionTable(connections) {
     cell(el('div', {}, el('span', { class: 'app-name' }, c.app || 'Unknown application'), el('span', { class: 'app-secondary' }, 'PID ' + c.pid)), ''),
     cell(badge(c.protocol, c.protocol === 'TCP' ? 'blue' : '')),
     cell(endpoint(c.localAddress, c.localPort), 'number endpoint'),
-    cell(el('div', {},
+    cell(el('div', { class: 'endpoint-cell' },
       el('span', { class: 'endpoint-addr' }, endpoint(c.remoteAddress, c.remotePort)),
-      c.remoteHost || c.service ? el('span', { class: 'endpoint-host' },
+      c.remoteHost || c.service ? el('span', { class: 'endpoint-host', title: (c.service ? '[' + c.service + '] ' : '') + (c.remoteHost || '') },
         c.service ? el('span', { class: 'badge-subtle' }, c.service) : null,
-        c.remoteHost ? ' ' + c.remoteHost : ''
+        c.remoteHost ? el('span', { class: 'host-text' }, c.remoteHost) : null
       ) : null
     ), 'number endpoint'),
     cell(c.state || '—'))), 'connection-list');
@@ -502,28 +509,41 @@ function renderNetwork() {
   text('network-summary', state ? adapters.length + ' adapters · ' + adapters.filter(a => a.status === 'Up').length + ' up' : 'Waiting for adapter information');
   put('adapter-list', adapters.length ? adapters.map(adapter => el('section', { class: 'panel' }, el('div', { class: 'panel-heading adapter-heading' }, el('div', { class: 'adapter-title' }, el('span', { class: 'connection-icon' }, icon(adapter.type === 'Wi-Fi' ? 'wifi' : 'network')), el('div', {}, el('h2', {}, adapter.name), el('p', {}, adapter.description || adapter.type))), el('div', { class: 'adapter-badges' }, badge(adapter.status || 'Unknown', adapter.status === 'Up' ? 'good' : ''), ...(adapter.isDefault ? [badge('Default route', 'blue')] : []))), el('div', { class: 'adapter-rates' }, el('div', {}, el('span', {}, 'Download'), el('strong', { class: 'download-text' }, bytes(adapter.downloadBps, true))), el('div', {}, el('span', {}, 'Upload'), el('strong', { class: 'upload-text' }, bytes(adapter.uploadBps, true)))), details([['Type', adapter.type], ['IP addresses', list(adapter.ipAddresses).join('\n')], ['Gateway', adapter.gateway], ['MAC address', adapter.mac], ['Link speed', linkSpeed(adapter.speed)], ...(adapter.type === 'Wi-Fi' || adapter.ssid ? [['Wi-Fi network', adapter.ssid], ['Signal', adapter.signal], ['Receive link', adapter.linkReceiveMbps ? adapter.linkReceiveMbps + ' Mbps' : null], ['Transmit link', adapter.linkTransmitMbps ? adapter.linkTransmitMbps + ' Mbps' : null]] : []), ['Adapter received', bytes(adapter.receivedBytes)], ['Adapter sent', bytes(adapter.sentBytes)]]))) : pending('network adapters'));
 }
+function diagTile(label, value, note, color = '') {
+  return el('div', { class: 'diag-tile' },
+    el('div', { class: 'diag-tile-label' }, label),
+    el('div', { class: 'diag-tile-value ' + color }, value),
+    el('div', { class: 'diag-tile-note' }, note)
+  );
+}
+
 function renderDiagnostics() {
   const q = state?.diagnostics?.networkQuality;
   if (q) {
     const qBadgeClass = q.quality === 'Optimal' || q.quality === 'Good' ? 'good' : q.quality === 'Fair' ? 'blue' : 'bad';
     put('diag-quality-badge', badge(q.quality, qBadgeClass));
     put('diag-metrics',
-      metric('Internet ping', q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) + ' ms' : '—', 'Tested against 1.1.1.1', 'activity', 'download-text'),
-      metric('Gateway ping', q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) + ' ms' : '—', 'Local router / Wi-Fi', 'activity', 'upload-text'),
-      metric('Jitter', q.jitterMs !== null && q.jitterMs !== undefined ? q.jitterMs + ' ms' : '—', 'Ping variation', 'activity'),
-      metric('Packet loss', q.packetLossPercent + '%', 'Recent test window', 'activity', q.packetLossPercent > 0 ? 'upload-text' : '')
+      diagTile('Internet ping', q.internetPingMs !== null && q.internetPingMs !== undefined ? Math.round(q.internetPingMs) + ' ms' : '—', '1.1.1.1 Cloudflare', 'download-text'),
+      diagTile('Gateway ping', q.gatewayPingMs !== null && q.gatewayPingMs !== undefined ? Math.round(q.gatewayPingMs) + ' ms' : '—', 'Local router / Wi-Fi', 'upload-text'),
+      diagTile('Jitter', q.jitterMs !== null && q.jitterMs !== undefined ? q.jitterMs + ' ms' : '0 ms', 'Latency variance'),
+      diagTile('Packet loss', q.packetLossPercent + '%', 'Sample window', q.packetLossPercent > 0 ? 'upload-text' : '')
     );
     text('diag-gateway-ip', 'Gateway: ' + (q.gatewayAddress || 'Not detected'));
     renderPingChart(list(q.history));
   }
   const alerts = list(state?.alerts);
+  text('alerts-count', alerts.length ? '(' + alerts.length + ')' : '');
   if (!alerts.length) {
-    put('alerts-table', el('div', { style: 'padding: 24px; text-align: center; color: var(--muted); font-size: 13px;' }, 'No active alerts. Network health and telemetry are normal.'));
+    put('alerts-table', el('div', { class: 'empty-state', style: 'padding: 32px 20px;' },
+      el('span', { class: 'empty-icon' }, icon('shield')),
+      el('strong', {}, 'No network alerts recorded'),
+      el('p', {}, 'Telemetry is stable. Disconnections, sustained packet loss, or latency spikes will appear here.')
+    ));
   } else {
-    put('alerts-table', table(['Time', 'Level', 'Event', 'Details'], alerts.map(a => el('tr', {},
-      cell(time(a.time), 'small'),
+    put('alerts-table', table(['Time', 'Severity', 'Event', 'Details'], alerts.map(a => el('tr', {},
+      cell(time(a.time), 'small muted'),
       cell(badge(a.level.toUpperCase(), a.level === 'error' ? 'bad' : a.level === 'warning' ? 'warning' : 'blue')),
-      cell(el('strong', {}, a.title)),
+      cell(el('strong', { class: 'app-name' }, a.title)),
       cell(a.detail)
     ))));
   }
@@ -735,6 +755,9 @@ $('run-speedtest')?.addEventListener('click', async () => {
   if (speedTestRunning) return;
   speedTestRunning = true;
   $('run-speedtest').disabled = true;
+  $('speedtest-progress').hidden = false;
+  text('speedtest-badge', 'Testing…');
+  $('speedtest-badge').className = 'badge blue';
   text('speedtest-sub', 'Measuring latency & downloading test payload…');
   text('speedtest-val', '…');
   text('speedtest-msg', '');
@@ -742,17 +765,28 @@ $('run-speedtest')?.addEventListener('click', async () => {
     const res = await api('/api/diagnostics/speedtest', { method: 'POST', body: '{}' });
     if (res.success) {
       text('speedtest-val', res.downloadMbps);
-      text('speedtest-sub', 'Ping: ' + res.pingMs + 'ms · Duration: ' + res.durationSeconds + 's · Server: ' + res.server);
-      text('speedtest-msg', 'Successfully downloaded ' + bytes(res.bytesReceived) + ' via ' + res.server + '.');
+      text('speedtest-badge', 'Completed');
+      $('speedtest-badge').className = 'badge good';
+      put('speedtest-sub', el('div', { class: 'speedtest-meta' },
+        el('span', {}, icon('activity'), el('strong', {}, res.pingMs + ' ms'), ' ping'),
+        el('span', {}, el('strong', {}, res.durationSeconds + ' s'), ' duration'),
+        el('span', {}, el('strong', {}, res.server))
+      ));
+      text('speedtest-msg', 'Successfully downloaded ' + bytes(res.bytesReceived) + ' from ' + res.server + '.');
     } else {
       text('speedtest-val', '—');
+      text('speedtest-badge', 'Failed');
+      $('speedtest-badge').className = 'badge warning';
       text('speedtest-sub', res.error || 'Speed test failed');
     }
   } catch (err) {
     text('speedtest-val', '—');
+    text('speedtest-badge', 'Error');
+    $('speedtest-badge').className = 'badge error';
     text('speedtest-sub', err.message || 'Speed test failed');
   } finally {
     speedTestRunning = false;
+    $('speedtest-progress').hidden = true;
     $('run-speedtest').disabled = false;
   }
 });
@@ -766,9 +800,11 @@ $('ping-form')?.addEventListener('submit', async (e) => {
   pingRunning = true;
   const btn = $('ping-form').querySelector('button[type=submit]');
   btn.disabled = true;
+  const wrap = $('ping-console-wrap');
   const out = $('ping-output');
+  if (wrap) wrap.hidden = false;
   out.hidden = false;
-  out.textContent = 'Pinging ' + host + '…';
+  out.textContent = 'Pinging ' + host + '…\n';
   try {
     const res = await api('/api/diagnostics/ping?host=' + encodeURIComponent(host) + '&count=4');
     out.textContent = list(res.logs).join('\n');
@@ -778,6 +814,24 @@ $('ping-form')?.addEventListener('submit', async (e) => {
     pingRunning = false;
     btn.disabled = false;
   }
+});
+
+$('copy-ping-output')?.addEventListener('click', async () => {
+  const content = $('ping-output')?.textContent;
+  if (!content) return;
+  try {
+    await navigator.clipboard.writeText(content);
+    notify('Ping output copied.');
+  } catch {
+    notify('Could not copy output.');
+  }
+});
+
+document.querySelectorAll('.chip[data-ping]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    $('ping-host').value = chip.dataset.ping;
+    $('ping-form').requestSubmit();
+  });
 });
 
 let dnsRunning = false;
@@ -806,6 +860,29 @@ $('dns-form')?.addEventListener('submit', async (e) => {
     put('dns-results', el('p', { class: 'form-message error' }, err.message));
   } finally {
     dnsRunning = false;
+    btn.disabled = false;
+  }
+});
+
+document.querySelectorAll('.chip[data-dns]').forEach(chip => {
+  chip.addEventListener('click', () => {
+    $('dns-domain').value = chip.dataset.dns;
+    $('dns-form').requestSubmit();
+  });
+});
+
+$('clear-alerts')?.addEventListener('click', async () => {
+  const btn = $('clear-alerts');
+  btn.disabled = true;
+  try {
+    await api('/api/diagnostics/alerts/clear', { method: 'POST', body: '{}' });
+    if (state) state.alerts = [];
+    if (latest) latest.alerts = [];
+    renderDiagnostics();
+    notify('Alert history cleared.');
+  } catch (err) {
+    notify('Could not clear alerts: ' + err.message);
+  } finally {
     btn.disabled = false;
   }
 });
